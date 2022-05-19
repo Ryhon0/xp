@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/xp
+xp.so
+xp.dylib
+xp.dll
+xp.a
+xp.lib
+xp-test-*
+*.exe
+*.o
+*.obj
+*.lst

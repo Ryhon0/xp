@@ -1,0 +1,27 @@
+{
+	"authors": [
+		"ryhon"
+	],
+	"copyright": "Copyright © 2022, ryhon",
+	"dependencies": {
+		"arrogant": "~>0.3.0",
+		"arsd-official:terminal": "~>10.8.2",
+		"bindbc-sdl": "~>1.1.2",
+		"yajl": {
+			"repository": "git+https://github.com/Ryhon0/yajl-d.git",
+			"version": "1fdaa2d9ac1d20017e2df32aad291f088dc6c451"
+		},
+		"gtk-d":
+		{
+			"repository": "git+https://github.com/gtkd-developers/GtkD/tree/gtk4.git",
+			"version": "73b54335652b1712a569af81a02661b35d211244"
+		}
+	},
+	"description": "Music player supporting multiple streaming platforms",
+	"license": "GPL-3.0",
+	"name": "xp",
+	"versions": [
+		"SDL_2022",
+		"SDL_Mixer_204"
+	]
+}
