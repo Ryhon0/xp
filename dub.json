@@ -7,6 +7,7 @@
 		"arrogant": "~>0.3.0",
 		"arsd-official:terminal": "~>10.8.2",
 		"bindbc-sdl": "~>1.1.2",
+		"d2sqlite3": "~>1.0.0",
 		"d_adw": {
 			"repository": "git+https://github.com/KonstantIMP/d_adw.git",
 			"version": "dad9a86cc282e8a5d008b0b8de776cab103c601d"

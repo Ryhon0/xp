@@ -63,6 +63,7 @@ void playFile(const char* path)
 	mus = Mix_LoadMUS(path);
 	Mix_PlayMusic(mus, 0);
 	pause();
+	finished = false;
 	sl = 0;
 }
 
@@ -114,18 +115,13 @@ double getPosition()
 	return samplesToSecs(sl);
 }
 
-void setPosition(double secs)
-{
-	sl = secsToSamples(secs);
-}
+import std.algorithm;
 
 void seek(double secs)
 {
-	setPosition(secs);
+	sl = clamp(secsToSamples(secs), 0, secsToSamples(getLength()));
 	Mix_SetMusicPosition(secs);
 }
-
-import std.algorithm;
 
 float getVolume()
 {

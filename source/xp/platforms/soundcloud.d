@@ -22,7 +22,7 @@ class SoundCloudPlatform : PlatformProvider
 		string user = m["user"];
 		string song = m["song"];
 
-		return user + "/" + song;
+		return user ~ "/" ~ song;
 	}
 
 	override SongInfo getSongInfo(string uri)

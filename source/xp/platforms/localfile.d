@@ -32,8 +32,8 @@ class LocalfilePlatform : PlatformProvider
 		import tag;
 
 		string file = uri;
-		if(!file.startsWith("file://"))
-			file = file[7..$-1];
+		if(file.startsWith("file://"))
+			file = file[7..$];
 
 		SongInfo si = new SongInfo();
 		si.uri = uri;
@@ -50,8 +50,8 @@ class LocalfilePlatform : PlatformProvider
 			si.title = baseName(file);
 		}
 
-		si.title = uri.split("/")[$];
 		si.provider = "localfile";
+		si.id = getId(uri);
 
 		return si;
 	}

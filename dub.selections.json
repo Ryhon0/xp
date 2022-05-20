@@ -7,6 +7,7 @@
 		"bindbc-loader": "1.0.1",
 		"bindbc-sdl": "1.1.2",
 		"cachetools": "0.3.1",
+		"d2sqlite3": "1.0.0",
 		"d_adw": {"version":"dad9a86cc282e8a5d008b0b8de776cab103c601d","repository":"git+https://github.com/KonstantIMP/d_adw.git"},
 		"ddbus": "2.3.0",
 		"dplug": "12.6.0",
