@@ -1,0 +1,11 @@
+{
+	"authors": [
+		"ryhon"
+	],
+	"copyright": "Copyright © 2022, ryhon",
+	"description": "D bindings to libtag_c",
+	"license": "MIT",
+	"name": "tag",
+	"libs": ["tag_c"],
+	"targetType": "sourceLibrary"
+}

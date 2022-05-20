@@ -5,7 +5,10 @@
 		"arsd-official": "10.8.2",
 		"bindbc-loader": "1.0.1",
 		"bindbc-sdl": "1.1.2",
+		"ddbus": "2.3.0",
+		"dunit": "1.0.16",
 		"gtk-d": {"version":"73b54335652b1712a569af81a02661b35d211244","repository":"git+https://github.com/gtkd-developers/GtkD/tree/gtk4.git"},
+		"tag": {"path":"tag"},
 		"yajl": {"version":"1fdaa2d9ac1d20017e2df32aad291f088dc6c451","repository":"git+https://github.com/Ryhon0/yajl-d.git"}
 	}
 }
