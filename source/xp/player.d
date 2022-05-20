@@ -84,6 +84,7 @@ void pause()
 
 void resume()
 {
+	seek(getPosition());
 	Mix_ResumeMusic();
 }
 

@@ -16,6 +16,7 @@
 		"intel-intrinsics": "1.10.2",
 		"requests": "2.0.8",
 		"tag": {"path":"tag"},
+		"termbox": "0.0.5",
 		"yajl": {"version":"1fdaa2d9ac1d20017e2df32aad291f088dc6c451","repository":"git+https://github.com/Ryhon0/yajl-d.git"}
 	}
 }
