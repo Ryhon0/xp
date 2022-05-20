@@ -1,7 +1,6 @@
 module xp.platforms.youtube;
 import xp.platforms;
 import std.regex;
-import std.stdio;
 
 class YoutubePlatform : PlatformProvider
 {
@@ -10,9 +9,13 @@ class YoutubePlatform : PlatformProvider
 	override bool canHandle(string uri)
 	{
 		auto m = matchFirst(uri, videoRegex);
-		if (m["id"])
-			writeln("Matched youtube video " ~ m["id"]);
 		return !m.empty;
+	}
+
+	override string getId(string uri)
+	{
+		auto m = matchFirst(uri, videoRegex);
+		return m["id"];
 	}
 
 	override SongInfo getSongInfo(string uri)
@@ -28,14 +31,26 @@ class YoutubePlatform : PlatformProvider
 		si.title = j["title"].str;
 		si.author = j["author_name"].str;
 		si.uri = uri;
+		si.id = getId(uri);
+		si.provider = "youtube";
 
 		return si;
 	}
 
-	override string getDownload(string uri)
+	override string downloadFile(string uri)
 	{
 		import std.process;
+		import std.string;
+		import std.array;
+		import std.algorithm;
 
-		return execute(["youtube-dl", "--get-url" , "-f", "bestaudio", uri]).output;
+		import std.json;
+		import std.path;
+		auto jsonstr = execute(["youtube-dl", "--print-json" , "-f", "bestaudio", "--recode-video", "ogg", uri]).output;
+		JSONValue json = parseJSON(jsonstr);
+		string filename = json["_filename"].str;
+
+		ulong exlen = extension(filename).length;
+		return filename[0..$-exlen] ~ ".ogg";
 	}
 }

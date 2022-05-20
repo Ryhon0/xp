@@ -13,7 +13,7 @@ int main(string[] args)
 	import xp.mpris;
 	registerMpris();
 
-	import mainwindow;
+	import xp.ui.gtk.mainwindow;
 	import gio.Application : GioApplication = Application;
 	import gtk.Application;
 

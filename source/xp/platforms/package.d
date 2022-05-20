@@ -1,10 +1,11 @@
 module xp.platforms;
 
-class PlatformProvider
+abstract class PlatformProvider
 {
 	abstract bool canHandle(string uri);
+	abstract string getId(string uri);
 	abstract SongInfo getSongInfo(string uri);
-	abstract string getDownload(string uri);
+	abstract string downloadFile(string uri);
 }
 
 class SongInfo
@@ -12,4 +13,6 @@ class SongInfo
 	string title;
 	string author;
 	string uri;
+	string id;
+	string provider;
 }

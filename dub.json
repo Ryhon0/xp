@@ -7,16 +7,16 @@
 		"arrogant": "~>0.3.0",
 		"arsd-official:terminal": "~>10.8.2",
 		"bindbc-sdl": "~>1.1.2",
+		"d_adw": {
+			"repository": "git+https://github.com/KonstantIMP/d_adw.git",
+			"version": "dad9a86cc282e8a5d008b0b8de776cab103c601d"
+		},
 		"ddbus": "~>2.3.0",
 		"gtk-d": {
 			"repository": "git+https://github.com/gtkd-developers/GtkD.git",
 			"version": "73b54335652b1712a569af81a02661b35d211244"
 		},
-		"d_adw":
-		{
-			"repository": "git+https://github.com/KonstantIMP/d_adw.git",
-			"version": "dad9a86cc282e8a5d008b0b8de776cab103c601d"
-		},
+		"requests": "~>2.0.8",
 		"tag": {
 			"path": "tag",
 			"version": ">=0.0.0"

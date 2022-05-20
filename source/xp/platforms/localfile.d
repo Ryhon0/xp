@@ -1,7 +1,6 @@
 module xp.platforms.localfile;
 
 import xp.platforms;
-import std.stdio;
 
 class LocalfilePlatform : PlatformProvider
 {
@@ -17,24 +16,52 @@ class LocalfilePlatform : PlatformProvider
 		return exists(uri);
 	}
 
+	override string getId(string uri)
+	{
+		return uri;
+	}
+
 	override SongInfo getSongInfo(string uri)
 	{
 		// TODO: Audio metadata
+		import std.algorithm;
+		import std.string;
 		import std.array;
+		import std.path;
+		import std.conv;
+		import tag;
+
+		string file = uri;
+		if(!file.startsWith("file://"))
+			file = file[7..$-1];
 
 		SongInfo si = new SongInfo();
 		si.uri = uri;
-		si.title = uri.split("/")[$ - 1];
+
+		const TagLib_File* f = taglib_file_new(file.toStringz);
+		const(TagLib_Tag*) t = taglib_file_tag(f);
+		if(t != null)
+		{
+			si.title = taglib_tag_title(t).to!string;
+			si.author = taglib_tag_artist(t).to!string;
+		}
+		else
+		{
+			si.title = baseName(file);
+		}
+
+		si.title = uri.split("/")[$];
+		si.provider = "localfile";
 
 		return si;
 	}
 
-	override string getDownload(string uri)
+	override string downloadFile(string uri)
 	{
 		import std.algorithm;
 
-		if(!uri.startsWith("file://"))
-			uri = "file://" ~ uri;
+		if(uri.startsWith("file://"))
+			uri = uri[7..$];
 
 		return uri;
 	}

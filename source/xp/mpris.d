@@ -28,7 +28,7 @@ void mprisPoll()
 
 class MediaPlayer2
 {
-	import mainwindow;
+	import xp.ui.gtk.mainwindow;
 
 	void Raise()
 	{
@@ -60,8 +60,6 @@ class MediaPlayer2Player
 
 	void Seek(long posusec)
 	{
-		import std.stdio;
-
 		double pos = posusec / 1000.0;
 		seek(pos);
 	}

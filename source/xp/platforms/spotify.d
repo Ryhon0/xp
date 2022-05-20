@@ -2,7 +2,6 @@ module xp.platforms.spotify;
 
 import xp.platforms;
 import std.regex;
-import std.stdio;
 
 class SpotifyPlatform : PlatformProvider
 {
@@ -10,9 +9,13 @@ class SpotifyPlatform : PlatformProvider
 	override bool canHandle(string uri)
 	{
 		auto m = matchFirst(uri, songRegex);
-		if (m["id"])
-			writeln("Matched spotify track " ~ m["id"]);
 		return !m.empty;
+	}
+
+	override string getId(string uri)
+	{
+		auto m = matchFirst(uri, songRegex);
+		return m["id"];
 	}
 
 	override SongInfo getSongInfo(string uri)
@@ -38,13 +41,30 @@ class SpotifyPlatform : PlatformProvider
 		si.title = getOGValue("og:title");
 		si.author = getOGValue("og:description").split(" · ")[0];
 		si.uri = uri;
+		si.id = getId(uri);
+		si.provider = "spotify";
 
 		return si;
 	}
 
-	override string getDownload(string uri)
+	override string downloadFile(string uri)
 	{
-		return uri;
+		import std.process;
+		import std.string;
+		import std.array;
+		import std.algorithm;
+
+		SongInfo i = getSongInfo(uri);
+
+		import std.json;
+		import std.path;
+		auto jsonstr = execute(["youtube-dl", "--print-json" , "-f", "bestaudio", "--recode-video", "ogg", 
+			"ytsearch:" ~ i.author ~ " - " ~ i.title]).output;
+		JSONValue json = parseJSON(jsonstr);
+		string filename = json["_filename"].str;
+
+		ulong exlen = extension(filename).length;
+		return filename[0..$-exlen] ~ ".ogg";
 	}
 }
 

@@ -1,4 +1,4 @@
-module mainwindow;
+module xp.ui.gtk.mainwindow;
 
 import app;
 
@@ -6,15 +6,15 @@ import gtk.ApplicationWindow;
 import gtk.VolumeButton;
 import gtk.ScaleButton;
 import gtk.Application;
+import gtk.HeaderBar;
 import glib.Timeout;
-import gtk.IconView;
 import gtk.Button;
 import gtk.Label;
 import gtk.Scale;
 import gtk.Range;
+import gtk.Image;
 import xp.player;
 import gtk.Box;
-
 
 class MainWindow : ApplicationWindow
 {
@@ -23,12 +23,11 @@ class MainWindow : ApplicationWindow
 	VolumeButton volumeButton;
 	Label positionLabel;
 	Scale positionScale;
-	IconView pauseIcon;
 	Button pauseButton;
 	Label lengthLabel;
+	HeaderBar header;
 	Box box;
 
-	int secLength = 0;
 	bool isUpdate = 0;
 
 	this(Application app)
@@ -38,8 +37,23 @@ class MainWindow : ApplicationWindow
 
 		Timeout.add(10, &update, null);
 
-		setTitle("XP");
 		setSizeRequest(500, 50);
+
+		header = new HeaderBar();
+		setTitlebar(header);
+
+		{
+			Button openButton = new Button();
+			openButton.setIconName("gtk-open");
+			header.packStart(openButton);
+			openButton.addOnClicked(delegate(Button b)
+			{
+				import xp.ui.gtk.opensongdialog;
+				
+				OpenSongDialog dialog = new OpenSongDialog(this);
+				dialog.show();
+			});
+		}
 
 		box = new Box(Orientation.HORIZONTAL, 5);
 		setChild(box);
@@ -73,14 +87,13 @@ class MainWindow : ApplicationWindow
 		volumeButton.addOnValueChanged((double v, ScaleButton s) {
 			setVolume(s.getValue());
 		});
-
-		playFile("Alpha Dance.ogg");
 	}
 }
 
 extern (C) int update(void* userData)
 {
 	import xp.mpris;
+
 	mprisPoll();
 
 	import std.conv;
@@ -97,8 +110,8 @@ extern (C) int update(void* userData)
 	int posmins = cast(int) pos / 60;
 	int possecs = cast(int) pos % 60;
 
-	int lenmins = MainWindow.instance.secLength / 60;
-	int lensecs = MainWindow.instance.secLength % 60;
+	int lenmins = cast(int)getLength() / 60;
+	int lensecs = cast(int)getLength() % 60;
 
 	string posstr = posmins.to!string() ~ ":" ~ (possecs.to!string()
 			.rightJustifier(2, '0')).to!string;

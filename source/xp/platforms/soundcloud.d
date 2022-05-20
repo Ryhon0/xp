@@ -1,7 +1,6 @@
 module xp.platforms.soundcloud;
 
 import xp.platforms;
-import std.stdio;
 import std.regex;
 
 class SoundCloudPlatform : PlatformProvider
@@ -12,9 +11,18 @@ class SoundCloudPlatform : PlatformProvider
 	override bool canHandle(string uri)
 	{
 		auto m = matchFirst(uri, songRegex);
-		if (m["song"])
-			writeln("Matched soundcloud song " ~ m["user"] ~ "/" ~ m["song"]);
+		
 		return !m.empty;
+	}
+
+	override string getId(string uri)
+	{
+		auto m = matchFirst(uri, songRegex);
+		
+		string user = m["user"];
+		string song = m["song"];
+
+		return user + "/" + song;
 	}
 
 	override SongInfo getSongInfo(string uri)
@@ -30,14 +38,22 @@ class SoundCloudPlatform : PlatformProvider
 		si.title = j["title"].str;
 		si.author = j["author_name"].str;
 		si.uri = uri;
+		si.id = getId(uri);
+		si.provider = "soundcloud";
 
 		return si;
 	}
 
-	override string getDownload(string uri)
+	override string downloadFile(string uri)
 	{
 		import std.process;
+		import std.string;
 
-		return execute(["youtube-dl", "--get-url" , "-f", "bestaudio", uri]).output;
+		import std.json;
+		auto jsonstr = execute(["youtube-dl", "--print-json" , "-f", "bestaudio", uri]).output;
+		JSONValue json = parseJSON(jsonstr);
+		string filename = json["_filename"].str;
+		
+		return filename;
 	}
 }

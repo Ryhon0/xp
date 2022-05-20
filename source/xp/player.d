@@ -1,7 +1,6 @@
 module xp.player;
 
 import bindbc.sdl;
-import std.stdio;
 
 __gshared
 {
@@ -40,11 +39,11 @@ void playerInit()
 	Mix_OpenAudio(44_100, MIX_DEFAULT_FORMAT, 2, 1024);
 
 	int adevc = SDL_GetNumAudioDevices(0);
-	writeln("Available outputs");
+	//writeln("Available outputs");
 	for (int i = 0; i < adevc; i++)
 	{
 		import std.conv;
-		writeln(SDL_GetAudioDeviceName(i, 0).to!string);
+		//writeln(SDL_GetAudioDeviceName(i, 0).to!string);
 	}
 	int dev = Mix_OpenAudioDevice(44_100, MIX_DEFAULT_FORMAT, 2, 1024, SDL_GetAudioDeviceName(0, 0), 1);
 
@@ -63,6 +62,8 @@ void playFile(const char* path)
 
 	mus = Mix_LoadMUS(path);
 	Mix_PlayMusic(mus, 0);
+	pause();
+	sl = 0;
 }
 
 bool isFinished()
