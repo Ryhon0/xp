@@ -34,6 +34,14 @@ void tui()
 		shutdown();
 	setInputMode(InputMode.esc | InputMode.mouse);
 
+	void fullClear()
+	{
+		setClearAttributes(Color.white, Color.black);
+		setClearAttributes(Color.black, Color.white);
+		clear();
+		flush();
+	}
+
 	SongInfo[] songs;
 	int selection = 0;
 	void selectSong()
@@ -41,11 +49,24 @@ void tui()
 		songs = getSongs();
 		selection = 0;
 		state = State.SelectSong;
+		fullClear();
+	}
+
+	SongInfo currentSong;
+	void selectCurrentSong()
+	{
+		SongInfo song = songs[selection];
+		currentSong = song;
+		string file = getSongFile(song);
+		playFile(file.toStringz);
+		seek(0);
+		resume();
+		state = State.Player;
+		fullClear();
 	}
 
 	selectSong();
 	setVolume(0.2);
-	SongInfo currentSong;
 
 	while (1)
 	{
@@ -94,13 +115,7 @@ void tui()
 							continue;
 						selection = click;
 
-						SongInfo song = songs[selection];
-						currentSong = song;
-						string file = getSongFile(song);
-						playFile(file.toStringz);
-						seek(0);
-						resume();
-						state = State.Player;
+						selectCurrentSong();
 					}
 					else if (e.key == Key.arrowUp)
 					{
@@ -112,18 +127,14 @@ void tui()
 					}
 					else if (e.key == Key.enter)
 					{
-						SongInfo song = songs[selection];
-						currentSong = song;
-						string file = getSongFile(song);
-						playFile(file.toStringz);
-						seek(0);
-						resume();
-						state = State.Player;
+						selectCurrentSong();
 					}
 				}
 				if (e.key == Key.esc || e.ch == 'q')
 				{
 					state = State.Player;
+					write("\033[2J");
+					clear();
 				}
 
 				break;
@@ -140,10 +151,13 @@ void tui()
 				for (int i = 0; i < h - 2; i++)
 				{
 					bool filled;
-					if(getVolume() == 0) filled = false;
-					else filled = ((cast(float)((h - 3) - i) / (h - 3)) <= getVolume());
+					if (getVolume() == 0)
+						filled = false;
+					else
+						filled = ((cast(float)((h - 3) - i) / (h - 3)) <= getVolume());
 
-					setCell(0, i + 1, filled ? '█' : '░', filled ? Color.green : Color.white, Color.black);
+					setCell(0, i + 1, filled ? '█' : '░', filled ? Color.green
+							: Color.white, Color.black);
 				}
 
 				if (currentSong !is null)
@@ -174,7 +188,8 @@ void tui()
 						import std.algorithm;
 
 						int barl = cast(int)(getPosition() / getLength() * barsize);
-						if(barl == barsize) barl--;
+						if (barl == barsize)
+							barl--;
 						int barr = barsize - barl - 1;
 
 						wstring stringmul(wstring s, int c)
