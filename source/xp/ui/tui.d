@@ -25,6 +25,48 @@ void putString(wstring s, int x, int y, ushort fg = Color.white, ushort bg = Col
 	}
 }
 
+void putStringVertical(wstring s, int x, int y, ushort fg = Color.white, ushort bg = Color.black)
+{
+	for (int i = 0; i < s.length; i++)
+	{
+		setCell(x, y + i, s[i], fg, bg);
+	}
+}
+
+static wchar[] horizontalSmoothProgressChars = [
+	' ', '▏', '▎', '▍', '▌', '▋', '▊', '▉', '█'
+];
+static wchar[] verticalSmoothProgressChars = [
+	' ', '▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'
+];
+wstring progressBar(float value, int length, wchar[] chars = horizontalSmoothProgressChars)
+{
+	wstring s = "";
+	for (int i = 0; i < length; i++)
+	{
+		float minv = i / cast(float) length;
+		float maxv = (i + 1) / cast(float) length;
+
+		if (value >= minv)
+		{
+			if (value >= maxv)
+				s ~= chars[chars.length - 1];
+			else
+				s ~= chars[min(cast(int) map(value, minv, maxv, 1, chars.length - 1), chars.length - 1)];
+		}
+		else
+		{
+			s ~= chars[0];
+		}
+	}
+	return s;
+}
+
+float map(float value, float min1, float max1, float min2, float max2)
+{
+	return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
+}
+
 void tui()
 {
 	State state = State.SelectSong;
@@ -36,7 +78,7 @@ void tui()
 
 	void fullClear()
 	{
-		setClearAttributes(Color.white, Color.black);
+		setClearAttributes(Color.black, Color.black);
 		setClearAttributes(Color.black, Color.white);
 		clear();
 		flush();
@@ -148,17 +190,11 @@ void tui()
 				int h = height();
 
 				// Volume
-				for (int i = 0; i < h - 2; i++)
-				{
-					bool filled;
-					if (getVolume() == 0)
-						filled = false;
-					else
-						filled = ((cast(float)((h - 3) - i) / (h - 3)) <= getVolume());
+				import std.algorithm.mutation;
 
-					setCell(0, i + 1, filled ? '█' : '░', filled ? Color.green
-							: Color.white, Color.black);
-				}
+				wchar[] volchars = verticalSmoothProgressChars.dup;
+				wstring volbar = progressBar(1 - getVolume(), h - 2, volchars.reverse());
+				putStringVertical(volbar, 0, 1, Color.green, Color.white);
 
 				if (currentSong !is null)
 				{
@@ -183,66 +219,25 @@ void tui()
 						wstring lenstr = (lenmins.to!string() ~ ":" ~ (lensecs.to!string()
 								.rightJustifier(2, '0')).to!string).to!wstring;
 
-						barsize -= posstr.length - lenstr.length - 2;
-
-						import std.algorithm;
-
-						int barl = cast(int)(getPosition() / getLength() * barsize);
-						if (barl == barsize)
-							barl--;
-						int barr = barsize - barl - 1;
-
-						wstring stringmul(wstring s, int c)
-						{
-							wstring r = "";
-							for (int i = 0; i < c; i++)
-								r ~= s;
-							return r;
-						}
-
 						int i = 4;
 						putString(posstr, i, h - 2);
 						i += posstr.length + 1;
+						barsize -= posstr.length - lenstr.length - 2;
 
-						wstring bar;
-						bool hqbar = true;
-						if (hqbar)
+						bool smoothbar = false;
+						if (smoothbar)
 						{
-							bar = stringmul("█", barl);
-							putString(bar, i, h - 2, Color.blue);
-							i += bar.length;
-
-							float map(float value, float min1, float max1, float min2, float max2)
-							{
-								return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
-							}
-
-							double v = getPosition() / getLength();
-							double startv = (i - 9) / cast(double) barsize;
-							double nextv = (i - 8) / cast(double) barsize;
-							wchar[] chars = ['▏', '▎', '▍', '▌', '▋', '▊', '▉','█'];
-							wstring centerChar = [
-								chars[cast(int) map(v, startv, nextv, 0, 7)]
-							];
-							putString(centerChar, i, h - 2, Color.blue);
-							i += barr + 2;
+							wstring bar;
+							bar = progressBar(pos / len, barsize);
+							putString(bar, i, h - 2, Color.blue, Color.white);
+							i += bar.length + 1;
 						}
 						else
 						{
-							bar = stringmul("═", barl);
-							putString(bar, i, h - 2, Color.red);
-							i += bar.length;
-
-							putString("◯", i, h - 2, Color.blue);
-							i++;
-
-							bar = stringmul("─", barr);
-							if (bar.length)
-							{
-								putString(bar, i, h - 2);
-								i += bar.length;
-							}
-							i++;
+							wstring bar;
+							bar = progressBar(pos / len, barsize, ['─', '◯', '═']);
+							putString(bar, i, h - 2, Color.blue, Color.black);
+							i += bar.length + 1;
 						}
 
 						putString(lenstr, i, h - 2);
