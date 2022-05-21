@@ -204,26 +204,52 @@ void tui()
 						putString(posstr, i, h - 2);
 						i += posstr.length + 1;
 
-						wstring bar = stringmul("═", barl);
-						putString(bar, i, h - 2, Color.red);
-						i += bar.length;
-
-						putString("◯", i, h - 2, Color.blue);
-						i++;
-
-						bar = stringmul("─", barr);
-						if (bar.length)
+						wstring bar;
+						bool hqbar = true;
+						if (hqbar)
 						{
-							putString(bar, i, h - 2);
+							bar = stringmul("█", barl);
+							putString(bar, i, h - 2, Color.blue);
 							i += bar.length;
+
+							float map(float value, float min1, float max1, float min2, float max2)
+							{
+								return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
+							}
+
+							double v = getPosition() / getLength();
+							double startv = (i - 9) / cast(double) barsize;
+							double nextv = (i - 8) / cast(double) barsize;
+							wchar[] chars = ['▏', '▎', '▍', '▌', '▋', '▊', '▉','█'];
+							wstring centerChar = [
+								chars[cast(int) map(v, startv, nextv, 0, 7)]
+							];
+							putString(centerChar, i, h - 2, Color.blue);
+							i += barr + 2;
 						}
-						i++;
+						else
+						{
+							bar = stringmul("═", barl);
+							putString(bar, i, h - 2, Color.red);
+							i += bar.length;
+
+							putString("◯", i, h - 2, Color.blue);
+							i++;
+
+							bar = stringmul("─", barr);
+							if (bar.length)
+							{
+								putString(bar, i, h - 2);
+								i += bar.length;
+							}
+							i++;
+						}
 
 						putString(lenstr, i, h - 2);
 					}
 
 					wstring status = isFinished() ? "■" : (isPaused() ? "▌▌" : "▶");
-					putString(status, 2, h-2);
+					putString(status, 2, h - 2);
 
 					// Song name
 					wstring songname = (currentSong.author ~ " - " ~ currentSong.title).to!wstring;
