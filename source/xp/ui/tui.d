@@ -231,7 +231,7 @@ void tui()
 				}
 
 				// Bottom row info
-				wstring info = "^/v Volume  </> Seek  _ Play/Pause  C Change song  Q Exit";
+				wstring info = "↑↓ Volume  ←→ Seek  ␣ Play/Pause  C Change song  Q Exit";
 				putString(info, 0, h - 1, Color.black, Color.white);
 
 				flush();
