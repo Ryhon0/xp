@@ -1,5 +1,4 @@
 import yajl : encode;
-import arsd.terminal;
 import bindbc.sdl;
 import std.stdio;
 import std.conv;

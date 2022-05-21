@@ -11,17 +11,16 @@
 			"repository": "git+https://github.com/KonstantIMP/d_adw.git",
 			"version": "dad9a86cc282e8a5d008b0b8de776cab103c601d"
 		},
-		"ddbus": "~>2.3.0",
+		"ddbus": "~master",
 		"gtk-d": {
 			"repository": "git+https://github.com/gtkd-developers/GtkD.git",
 			"version": "73b54335652b1712a569af81a02661b35d211244"
 		},
-		"requests": "~>2.0.8",
 		"tag": {
 			"path": "tag",
 			"version": ">=0.0.0"
 		},
-		"termbox": "~>0.0.5",
+		"termbox": "~master",
 		"yajl": {
 			"repository": "git+https://github.com/Ryhon0/yajl-d.git",
 			"version": "1fdaa2d9ac1d20017e2df32aad291f088dc6c451"

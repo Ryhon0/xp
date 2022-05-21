@@ -1,6 +1,8 @@
 module xp.ui.tui;
 
+import termbox.keyboard;
 import std.algorithm;
+import termbox.color;
 import xp.platforms;
 import xp.library;
 import std.string;
@@ -8,8 +10,6 @@ import xp.player;
 import std.stdio;
 import std.conv;
 import termbox;
-import keyboard;
-import color;
 
 enum State
 {
