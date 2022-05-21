@@ -247,17 +247,17 @@ void tui()
 						setVolume(vol);
 					}
 
-					if (e.y == h - 2 && e.x >= 2 && e.x <= w - 2)
+					if (e.y == h - 2 && e.x >= 4 && e.x <= w - 2)
 					{
-						float pos = ((e.x - 6.0) / (w - 12));
+						float pos = ((e.x - 9.0) / (w - 16));
 						seek(pos * getLength());
 					}
 				}
-				else if (e.key == Key.arrowUp || e.ch == '+')
+				else if (e.key == Key.arrowUp || e.ch == '+' || e.key == Key.mouseWheelUp)
 				{
 					setVolume(getVolume() + voloffset);
 				}
-				else if (e.key == Key.arrowDown || e.ch == '-')
+				else if (e.key == Key.arrowDown || e.ch == '-' || e.key == Key.mouseWheelDown)
 				{
 					setVolume(getVolume() - voloffset);
 				}
