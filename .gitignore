@@ -13,3 +13,5 @@ xp-test-*
 *.o
 *.obj
 *.lst
+xp.sqlite
+dub.selections.json
