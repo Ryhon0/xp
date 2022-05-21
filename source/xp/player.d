@@ -12,7 +12,7 @@ extern (C) nothrow
 {
 	void lenmix(void* udata, ubyte* stream, int len)
 	{
-		if (!Mix_PausedMusic())
+		if (!finished || !Mix_PausedMusic())
 		{
 			sl += len;
 		}
@@ -84,6 +84,7 @@ void pause()
 
 void resume()
 {
+	finished = false;
 	seek(getPosition());
 	Mix_ResumeMusic();
 }

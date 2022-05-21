@@ -164,7 +164,7 @@ void tui()
 				{
 					/// Progress
 					{
-						int barsize = w - 4 - 10 - 2;
+						int barsize = w - 4 - 10 - 4;
 						float len = getLength();
 						if (len == 0)
 							len = 1;
@@ -200,7 +200,7 @@ void tui()
 							return r;
 						}
 
-						int i = 2;
+						int i = 4;
 						putString(posstr, i, h - 2);
 						i += posstr.length + 1;
 
@@ -221,6 +221,9 @@ void tui()
 
 						putString(lenstr, i, h - 2);
 					}
+
+					wstring status = isFinished() ? "■" : (isPaused() ? "▌▌" : "▶");
+					putString(status, 2, h-2);
 
 					// Song name
 					wstring songname = (currentSong.author ~ " - " ~ currentSong.title).to!wstring;
@@ -277,8 +280,6 @@ void tui()
 				else if (e.key == Key.esc || e.ch == 'q')
 					return;
 
-				if (isFinished())
-					selectSong();
 				break;
 			}
 		}
