@@ -21,11 +21,7 @@
 			"path": "tag",
 			"version": ">=0.0.0"
 		},
-		"termbox": "~master",
-		"yajl": {
-			"repository": "git+https://github.com/Ryhon0/yajl-d.git",
-			"version": "1fdaa2d9ac1d20017e2df32aad291f088dc6c451"
-		}
+		"termbox": "~master"
 	},
 	"description": "Music player supporting multiple streaming platforms",
 	"license": "GPL-3.0",

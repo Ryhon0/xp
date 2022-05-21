@@ -1,4 +1,3 @@
-import yajl : encode;
 import bindbc.sdl;
 import std.stdio;
 import std.conv;
