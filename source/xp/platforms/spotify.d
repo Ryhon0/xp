@@ -54,17 +54,39 @@ class SpotifyPlatform : PlatformProvider
 		import std.array;
 		import std.algorithm;
 
-		SongInfo i = getSongInfo(uri);
-
 		import std.json;
 		import std.path;
-		auto jsonstr = execute(["youtube-dl", "--print-json" , "-f", "bestaudio", "--recode-video", "ogg", 
-			"ytsearch:" ~ i.author ~ " - " ~ i.title]).output;
-		JSONValue json = parseJSON(jsonstr);
-		string filename = json["_filename"].str;
 
-		ulong exlen = extension(filename).length;
-		return filename[0..$-exlen] ~ ".ogg";
+		import standardpaths;
+		import std.file;
+
+		string tmpdir = writablePath(StandardPath.cache, FolderFlag.create) ~ "/xp/";
+		if (!exists(tmpdir))
+			mkdir(tmpdir);
+
+		SongInfo si = getSongInfo(uri);
+		string query = si.author ~ " - " ~ si.title;
+
+		auto jsonstr = execute([
+			"youtube-dl", "--print-json", "-f", "bestaudio",
+			"--recode-video", "ogg", "--embed-metadata", "-o",
+			tmpdir ~ "%(id)s.%(ext)s", "ytsearch:" ~ query
+		]).output;
+
+		JSONValue json = parseJSON(jsonstr);
+		string filepath = json["_filename"].str;
+		ulong exlen = extension(filepath).length;
+		filepath = filepath[0 .. $ - exlen] ~ ".ogg";
+
+		string filename = baseName(filepath);
+
+		string datadir = writablePath(StandardPath.data, FolderFlag.create) ~ "/xp/songs/";
+		if (!exists(datadir))
+			mkdir(datadir);
+
+		rename(filepath, datadir ~ filename);
+
+		return datadir ~ filename;
 	}
 }
 

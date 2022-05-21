@@ -11,14 +11,14 @@ class SoundCloudPlatform : PlatformProvider
 	override bool canHandle(string uri)
 	{
 		auto m = matchFirst(uri, songRegex);
-		
+
 		return !m.empty;
 	}
 
 	override string getId(string uri)
 	{
 		auto m = matchFirst(uri, songRegex);
-		
+
 		string user = m["user"];
 		string song = m["song"];
 
@@ -35,8 +35,8 @@ class SoundCloudPlatform : PlatformProvider
 		JSONValue j = parseJSON(json);
 
 		SongInfo si = new SongInfo();
-		si.title = j["title"].str;
 		si.author = j["author_name"].str;
+		si.title = j["title"].str[0 .. $ - si.author.length - 4];
 		si.uri = uri;
 		si.id = getId(uri);
 		si.provider = "soundcloud";
@@ -48,12 +48,25 @@ class SoundCloudPlatform : PlatformProvider
 	{
 		import std.process;
 		import std.string;
+		import std.array;
+		import std.algorithm;
 
 		import std.json;
-		auto jsonstr = execute(["youtube-dl", "--print-json" , "-f", "bestaudio", uri]).output;
+		import std.path;
+
+		import standardpaths;
+		import std.file;
+
+		string datadir = writablePath(StandardPath.data, FolderFlag.create) ~ "/xp/songs/";
+		if (!exists(datadir))
+			mkdir(datadir);
+
+		auto jsonstr = execute([
+			"youtube-dl", "--print-json", "-f", "bestaudio",
+			"--embed-metadata", "-o", datadir ~ "%(id)s.%(ext)s", uri
+		]).output;
+
 		JSONValue json = parseJSON(jsonstr);
-		string filename = json["_filename"].str;
-		
-		return filename;
+		return json["_filename"].str;
 	}
 }
