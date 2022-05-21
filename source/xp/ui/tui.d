@@ -17,7 +17,7 @@ enum State
 	Player
 }
 
-void putString(string s, int x, int y, ushort fg = Color.white, ushort bg = Color.black)
+void putString(wstring s, int x, int y, ushort fg = Color.white, ushort bg = Color.black)
 {
 	for (int i = 0; i < s.length; i++)
 	{
@@ -27,44 +27,12 @@ void putString(string s, int x, int y, ushort fg = Color.white, ushort bg = Colo
 
 void tui()
 {
-	string getSlider(int barsize)
-	{
-		import std.string;
-
-		int posmins = cast(int) getPosition() / 60;
-		int possecs = cast(int) getPosition() % 60;
-
-		int lenmins = cast(int) getLength() / 60;
-		int lensecs = cast(int) getLength() % 60;
-
-		string posstr = posmins.to!string() ~ ":" ~ (possecs.to!string()
-				.rightJustifier(2, '0')).to!string;
-		string lenstr = lenmins.to!string() ~ ":" ~ (lensecs.to!string()
-				.rightJustifier(2, '0')).to!string;
-
-		barsize -= posstr.length - lenstr.length - 2;
-
-		import std.algorithm;
-
-		int barl = cast(int)(getPosition() / getLength() * barsize);
-		int barr = barsize - barl - 1;
-
-		string stringmul(string s, int c)
-		{
-			string r = "";
-			for (int i = 0; i < c; i++)
-				r ~= s;
-			return r;
-		}
-
-		return posstr ~ " " ~ stringmul("=", min(barl, barsize - 1)) ~ "o" ~ stringmul("-", barr) ~ " " ~ lenstr;
-	}
-
 	State state = State.SelectSong;
 
 	init();
 	scope (exit)
 		shutdown();
+	setInputMode(InputMode.esc | InputMode.mouse);
 
 	SongInfo[] songs;
 	int selection = 0;
@@ -93,7 +61,7 @@ void tui()
 					for (int i = 0; i < songs.length; i++)
 					{
 						SongInfo song = songs[i];
-						string text = song.author ~ " - " ~ song.title;
+						wstring text = (song.author ~ " - " ~ song.title).to!wstring;
 
 						ushort fg = Color.white;
 						int x = 1;
@@ -109,17 +77,32 @@ void tui()
 				}
 				else
 				{
-					putString("No songs found, use 'xp add <uri>' to add them", 1, 1, Color.red, Color.black);
+					putString("No songs found, use 'xp add <uri>' to add them", 1, 1, Color.red, Color
+							.black);
 					putString("Press Q or ESC to exit", 1, 2, Color.red, Color.black);
 				}
 
-				flush();
 				Event e;
 				peekEvent(&e, 1);
-
-				if(songs.length)
+				flush();
+				if (songs.length)
 				{
-					if (e.key == Key.arrowUp)
+					if (e.key == Key.mouseLeft)
+					{
+						int click = e.y - 1;
+						if (click < 0 || click >= songs.length)
+							continue;
+						selection = click;
+
+						SongInfo song = songs[selection];
+						currentSong = song;
+						string file = getSongFile(song);
+						playFile(file.toStringz);
+						seek(0);
+						resume();
+						state = State.Player;
+					}
+					else if (e.key == Key.arrowUp)
 					{
 						selection = clamp(selection - 1, 0, cast(int) songs.length - 1);
 					}
@@ -139,7 +122,9 @@ void tui()
 					}
 				}
 				if (e.key == Key.esc || e.ch == 'q')
-					return;
+				{
+					state = State.Player;
+				}
 
 				break;
 			}
@@ -151,21 +136,84 @@ void tui()
 				int w = width();
 				int h = height();
 
-				/// Progress
-				string s = getSlider(w - 16);
-				putString(s, 2, h - 2, Color.white, Color.black);
-
 				// Volume
 				for (int i = 0; i < h - 2; i++)
-					setCell(0, i + 1, ((cast(float)((h - 4) - i) / (h - 4)) <= getVolume()) ? '#' : '|', Color.white, Color
-							.black);
+				{
+					bool filled;
+					if(getVolume() == 0) filled = false;
+					else filled = ((cast(float)((h - 3) - i) / (h - 3)) <= getVolume());
 
-				// Song name
-				string songname = currentSong.author ~ " - " ~ currentSong.title;
-				putString(songname, 2, h-3, Color.white, Color.black);
+					setCell(0, i + 1, filled ? '█' : '░', filled ? Color.green : Color.white, Color.black);
+				}
+
+				if (currentSong !is null)
+				{
+					/// Progress
+					{
+						int barsize = w - 4 - 10 - 2;
+						float len = getLength();
+						if (len == 0)
+							len = 1;
+						float pos = getPosition();
+
+						int posmins = cast(int) pos / 60;
+						int possecs = cast(int) pos % 60;
+
+						int lenmins = cast(int) len / 60;
+						int lensecs = cast(int) len % 60;
+
+						import std.string;
+
+						wstring posstr = (posmins.to!string() ~ ":" ~ (possecs.to!string()
+								.rightJustifier(2, '0')).to!string).to!wstring;
+						wstring lenstr = (lenmins.to!string() ~ ":" ~ (lensecs.to!string()
+								.rightJustifier(2, '0')).to!string).to!wstring;
+
+						barsize -= posstr.length - lenstr.length - 2;
+
+						import std.algorithm;
+
+						int barl = cast(int)(getPosition() / getLength() * barsize);
+						if(barl == barsize) barl--;
+						int barr = barsize - barl - 1;
+
+						wstring stringmul(wstring s, int c)
+						{
+							wstring r = "";
+							for (int i = 0; i < c; i++)
+								r ~= s;
+							return r;
+						}
+
+						int i = 2;
+						putString(posstr, i, h - 2);
+						i += posstr.length + 1;
+
+						wstring bar = stringmul("═", barl);
+						putString(bar, i, h - 2, Color.red);
+						i += bar.length;
+
+						putString("o", i, h - 2, Color.blue);
+						i++;
+
+						bar = stringmul("─", barr);
+						if (bar.length)
+						{
+							putString(bar, i, h - 2);
+							i += bar.length;
+						}
+						i++;
+
+						putString(lenstr, i, h - 2);
+					}
+
+					// Song name
+					wstring songname = (currentSong.author ~ " - " ~ currentSong.title).to!wstring;
+					putString(songname, 2, h - 3, Color.white, Color.black);
+				}
 
 				// Bottom row info
-				string info = "^/v Volume  </> Seek  _ Play/Pause  C Change song  Q Exit";
+				wstring info = "^/v Volume  </> Seek  _ Play/Pause  C Change song  Q Exit";
 				putString(info, 0, h - 1, Color.black, Color.white);
 
 				flush();
@@ -173,7 +221,21 @@ void tui()
 				peekEvent(&e, 1);
 
 				float voloffset = 0.02;
-				if (e.key == Key.arrowUp || e.ch == '+')
+				if (e.key == Key.mouseLeft)
+				{
+					if (e.x == 0)
+					{
+						float vol = 1 - ((e.y - 1.0) / (h - 2));
+						setVolume(vol);
+					}
+
+					if (e.y == h - 2 && e.x >= 2 && e.x <= w - 2)
+					{
+						float pos = ((e.x - 6.0) / (w - 12));
+						seek(pos * getLength());
+					}
+				}
+				else if (e.key == Key.arrowUp || e.ch == '+')
 				{
 					setVolume(getVolume() + voloffset);
 				}
@@ -207,6 +269,7 @@ void tui()
 		}
 
 		import xp.mpris;
+
 		mprisPoll();
 	}
 }
