@@ -7,7 +7,13 @@ Database db;
 
 void libraryInit()
 {
-	db = Database("xp.sqlite");
+	import standardpaths;
+	import std.file;
+	string datadir = writablePath(StandardPath.data, FolderFlag.create) ~ "/xp/";
+	if(!exists(datadir))
+		mkdir(datadir);
+
+	db = Database(datadir ~ "xp.sqlite");
 	db.run("CREATE TABLE IF NOT EXISTS songlist (
 	title	TEXT,
 	author	TEXT,

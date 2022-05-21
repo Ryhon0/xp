@@ -16,6 +16,7 @@
 			"repository": "git+https://github.com/gtkd-developers/GtkD.git",
 			"version": "73b54335652b1712a569af81a02661b35d211244"
 		},
+		"standardpaths": "~>0.8.2",
 		"tag": {
 			"path": "tag",
 			"version": ">=0.0.0"

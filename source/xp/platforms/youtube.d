@@ -46,8 +46,26 @@ class YoutubePlatform : PlatformProvider
 
 		import std.json;
 		import std.path;
-		auto jsonstr = execute(["youtube-dl", "--print-json" , "-f", "bestaudio", "--recode-video", "ogg", uri]).output;
-		JSONValue json = parseJSON(jsonstr);
+
+		import standardpaths;
+		import std.file;
+		string tmpdir = writablePath(StandardPath.cache, FolderFlag.create) ~ "/xp/";
+		if(!exists(tmpdir))
+			mkdir(tmpdir);
+
+		auto jsonstr = execute(["youtube-dl", "--print-json" , "-f", "bestaudio", 
+			"--recode-video", "ogg", "-o", tmpdir ~ "%(id)s.%(ext)s", uri]).output;
+			JSONValue json;
+			try
+			{
+		json = parseJSON(jsonstr);
+			}
+			catch(Exception e)
+			{
+				import std.stdio;
+				writeln(jsonstr);
+				throw new Exception("");
+			}
 		string filename = json["_filename"].str;
 
 		ulong exlen = extension(filename).length;
