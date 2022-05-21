@@ -193,7 +193,7 @@ void tui()
 						putString(bar, i, h - 2, Color.red);
 						i += bar.length;
 
-						putString("o", i, h - 2, Color.blue);
+						putString("◯", i, h - 2, Color.blue);
 						i++;
 
 						bar = stringmul("─", barr);
