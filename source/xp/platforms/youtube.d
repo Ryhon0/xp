@@ -4,6 +4,10 @@ import std.regex;
 
 class YoutubePlatform : PlatformProvider
 {
+	mixin RegisterPlatformProvider;
+
+	string id = "spotify";
+
 	/// https://stackoverflow.com/a/37704433
 	auto videoRegex = ctRegex!r"^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)(?P<id>[\w\-]+)(\S+)?$";
 	override bool canHandle(string uri)

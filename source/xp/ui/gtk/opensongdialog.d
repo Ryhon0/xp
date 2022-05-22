@@ -31,28 +31,9 @@ class OpenSongDialog : Dialog
 
 	void loadUri(string uri)
 	{
-		import xp.platforms;	
-		import xp.platforms.localfile;	
-		import xp.platforms.youtube;	
-		import xp.platforms.spotify;	
-		import xp.platforms.soundcloud;
+		import xp.platforms;
 
-		PlatformProvider[] provs;
-		PlatformProvider prov;
-
-		provs ~= new YoutubePlatform();
-		provs ~= new SpotifyPlatform();
-		provs ~= new SoundCloudPlatform();
-		provs ~= new LocalfilePlatform();
-
-		foreach(candprov; provs)
-		{
-			if(candprov.canHandle(uri))
-			{
-				prov = candprov;
-				break;
-			}
-		}
+		PlatformProvider prov = autoGetProviderForURI(uri);
 
 		if(prov is null)
 		{

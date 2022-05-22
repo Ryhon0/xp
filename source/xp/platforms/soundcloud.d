@@ -5,6 +5,10 @@ import std.regex;
 
 class SoundCloudPlatform : PlatformProvider
 {
+	mixin RegisterPlatformProvider;
+
+	string id = "soundcloud";
+
 	auto playlistRegex = ctRegex!r"^http[s]?:\/\/soundcloud.com\/(?P<user>.*)\/sets\/(?P<playlist>.*)";
 	auto songRegex = ctRegex!r"^http[s]?:\/\/soundcloud.com\/(?P<user>.*)\/(?P<song>.*)";
 

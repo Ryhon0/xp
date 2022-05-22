@@ -4,6 +4,10 @@ import xp.platforms;
 
 class LocalfilePlatform : PlatformProvider
 {
+	mixin RegisterPlatformProvider;
+
+	string id = "localfile";
+
 	override bool canHandle(string uri)
 	{
 		import std.algorithm;

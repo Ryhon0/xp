@@ -42,27 +42,13 @@ int main(string[] args)
 			import xp.platforms.spotify;
 			import xp.platforms.soundcloud;
 
-			PlatformProvider[] provs;
-			PlatformProvider prov;
-
-			provs ~= new YoutubePlatform();
-			provs ~= new SpotifyPlatform();
-			provs ~= new SoundCloudPlatform();
-			provs ~= new LocalfilePlatform();
-
-			foreach (candprov; provs)
-			{
-				if (candprov.canHandle(uri))
-				{
-					prov = candprov;
-					break;
-				}
-			}
+			PlatformProvider prov = autoGetProviderForURI(uri);
 
 			if (prov is null)
 				return 1;
 			
 			SongInfo si = prov.getSongInfo(uri);
+			writeln("Downloading " ~ si.author ~ " - " ~ si.title);
 			string file = prov.downloadFile(uri);
 
 			addSong(si, file);

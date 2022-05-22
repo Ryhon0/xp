@@ -5,6 +5,10 @@ import std.regex;
 
 class SpotifyPlatform : PlatformProvider
 {
+	mixin RegisterPlatformProvider;
+
+	string id = "spotify";
+
 	auto songRegex = ctRegex!r"^http[s]:\/\/open.spotify.com\/track\/(?P<id>[^?]*)";
 	override bool canHandle(string uri)
 	{
