@@ -55,7 +55,7 @@ class YoutubePlatform : PlatformProvider
 			mkdir(tmpdir);
 
 		auto jsonstr = execute([
-			"youtube-dl", "--print-json", "-f", "bestaudio",
+			"youtube-dl", "--print-json", "-f", "bestaudio", "--no-playlist",
 			"--recode-video", "ogg", "--embed-metadata", "-o", tmpdir ~ "%(id)s.%(ext)s", uri
 		]).output;
 
