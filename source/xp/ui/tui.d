@@ -43,10 +43,9 @@ void drawBox(int x, int y, int w, int h, wchar[6] chars, ushort color = Color.wh
 	wstring charmul(wchar ch, int c)
 	{
 		wchar[] chars;
-		for (int i = 0; i < c; i++)
-		{
-			chars ~= ch;
-		}
+		chars.length = c;
+		chars[] = ch;
+		
 		return chars.to!wstring;
 	}
 
