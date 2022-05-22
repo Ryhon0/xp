@@ -21,11 +21,18 @@
 			"path": "tag",
 			"version": ">=0.0.0"
 		},
-		"termbox": "~master"
+		"termbox": 
+		{
+			"repository": "git+https://github.com/Ryhon0/termbox-d.git",
+			"version": "a60d548e5c8583c3f591aad54104ea29b5641e08"
+		}
 	},
 	"description": "Music player supporting multiple streaming platforms",
 	"license": "GPL-3.0",
 	"name": "xp",
+	"stringImportPaths": [
+		"source"
+	],
 	"versions": [
 		"SDL_2022",
 		"SDL_Mixer_204"
