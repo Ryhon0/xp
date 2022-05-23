@@ -44,33 +44,22 @@ SongInfo[] getSongs()
 	return songs;
 }
 
-SongInfo getSongById(string provider, string id)
+bool isInLibrary(SongInfo song)
 {
 	Statement st = db.prepare(
-		"SELECT * FROM songlist WHERE provider = :provider AND id = :id LIMIT 1");
+		"SELECT id FROM songlist WHERE provider = :provider AND id = :id");
+	string provider = song.provider, id = song.id;
 	st.bindAll(provider, id);
 
 	ResultRange r = st.execute();
 
-	if (r.empty)
-		return null;
-
-	SongInfo si = new SongInfo();
-
-	Row rw = r.front();
-	si.title = rw["title"].as!string;
-	si.author = rw["author"].as!string;
-	si.id = rw["id"].as!string;
-	si.uri = rw["uri"].as!string;
-	si.provider = rw["provider"].as!string;
-
-	return si;
+	return !r.empty;
 }
 
 string getSongFile(SongInfo song)
 {
 	Statement st = db.prepare(
-		"SELECT * FROM songlist WHERE provider = :provider AND id = :id LIMIT 1");
+		"SELECT file FROM songlist WHERE provider = :provider AND id = :id");
 	string provider = song.provider, id = song.id;
 	st.bindAll(provider, id);
 
@@ -78,8 +67,6 @@ string getSongFile(SongInfo song)
 
 	if (r.empty)
 		return null;
-
-	SongInfo si = new SongInfo();
 
 	Row rw = r.front();
 	return rw["file"].as!string;

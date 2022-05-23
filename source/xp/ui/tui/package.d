@@ -293,6 +293,20 @@ void tui()
 
 				SongInfo si = prov.getSongInfo(uri);
 
+				// Check if already in library
+				if(isInLibrary(si))
+				{
+					addSongError = "Song already in library";
+					foreach(i,s; songs)
+						if(s.id == si.id && s.provider == si.provider)
+						{
+							selection = cast(int)i;
+							break;
+						}
+
+					continue;
+				}
+
 				int bw = 50;
 				int bh = 7;
 				int x = (w / 2) - (bw / 2);
