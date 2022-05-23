@@ -2,6 +2,7 @@ module xp.platforms.spotify;
 
 import xp.platforms.youtube;
 import xp.platforms;
+import std.string;
 import std.regex;
 
 class SpotifyPlatform : PlatformProvider
@@ -94,8 +95,22 @@ class SpotifyPlatform : PlatformProvider
 			mkdir(datadir);
 
 		rename(filepath, datadir ~ filename);
+		filepath = datadir ~ filename;
 
-		return datadir ~ filename;
+		// Embed spotify metadata
+		import tag;
+		TagLib_File* f = taglib_file_new(filepath.toStringz);
+		TagLib_Tag* t = taglib_file_tag(f);
+		taglib_tag_set_title(t, si.title.toStringz);
+		taglib_tag_set_artist(t, si.author.toStringz);
+		// No album art in taglib_c :(
+		taglib_file_save(f);
+		
+		taglib_file_free(f);
+		taglib_tag_free_strings();
+		taglib_free(cast(void*)t);
+
+		return filepath;
 	}
 }
 
