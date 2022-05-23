@@ -50,9 +50,8 @@ class LocalfilePlatform : PlatformProvider
 			si.author = taglib_tag_artist(t).to!string;
 		}
 
-		taglib_file_free(f);
 		taglib_tag_free_strings();
-		taglib_free(cast(void*)t);
+		taglib_file_free(f);
 
 		if(!si.title.length) si.title = baseName(file);
 		if(!si.author.length) si.author = "unknown";

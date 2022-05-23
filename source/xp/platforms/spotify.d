@@ -80,9 +80,9 @@ class SpotifyPlatform : PlatformProvider
 		else args ~= "youtube-dl";
 
 		auto jsonstr = execute(args ~ ["--print-json", "-f", "bestaudio", "--no-playlist",
-			"--recode-video", "ogg", "--embed-metadata", "-o", tmpdir ~ "%(id)s.%(ext)s", uri
+			"--recode-video", "ogg", "--embed-metadata", "-o", tmpdir ~ "%(id)s.%(ext)s", "ytsearch:"~query
 		]).output;
-
+	
 		JSONValue json = parseJSON(jsonstr);
 		string filepath = json["_filename"].str;
 		ulong exlen = extension(filepath).length;
@@ -106,9 +106,8 @@ class SpotifyPlatform : PlatformProvider
 		// No album art in taglib_c :(
 		taglib_file_save(f);
 		
-		taglib_file_free(f);
 		taglib_tag_free_strings();
-		taglib_free(cast(void*)t);
+		taglib_file_free(f);
 
 		return filepath;
 	}

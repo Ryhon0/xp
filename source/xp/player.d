@@ -61,7 +61,6 @@ void playFile(const char* path)
 	lengthSecs = taglib_audioproperties_length(props);
 
 	taglib_file_free(f);
-	taglib_free(cast(void*)props);
 	if(mus) Mix_FreeMusic(mus);
 
 	mus = Mix_LoadMUS(path);
