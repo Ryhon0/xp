@@ -56,7 +56,7 @@ class LocalfilePlatform : PlatformProvider
 		if(!si.title.length) si.title = baseName(file);
 		if(!si.author.length) si.author = "unknown";
 
-		si.provider = "localfile";
+		si.provider = this.id;
 		si.id = getId(uri);
 
 		return si;

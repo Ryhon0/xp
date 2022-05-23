@@ -48,7 +48,7 @@ class SpotifyPlatform : PlatformProvider
 		si.author = getOGValue("og:description").split(" · ")[0];
 		si.uri = uri;
 		si.id = getId(uri);
-		si.provider = "spotify";
+		si.provider = this.id;
 
 		return si;
 	}

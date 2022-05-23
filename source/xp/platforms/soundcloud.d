@@ -43,7 +43,7 @@ class SoundCloudPlatform : PlatformProvider
 		si.title = j["title"].str[0 .. $ - si.author.length - 4];
 		si.uri = uri;
 		si.id = getId(uri);
-		si.provider = "soundcloud";
+		si.provider = this.id;
 
 		return si;
 	}

@@ -323,7 +323,10 @@ void tui()
 
 				foreach(i,s; songs)
 					if(s.id == si.id && s.provider == si.provider)
+					{
 						selection = cast(int)i;
+						break;
+					}
 
 				selectSong();
 				addSongInput = "";

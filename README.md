@@ -18,7 +18,7 @@ GUI and TUI music player with support for multiple streaming services.
 ## Dependencies
 * DUB and D compiler (prefarably LDC2)
 * SDL2_mixer
-* gtk4
+* gtk4 and libadwaita
 * yt-dlp/youtube-dl
 * ffmpeg or avconv
 * taglib (taglib_c)
