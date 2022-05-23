@@ -33,6 +33,17 @@ immutable(T[]) charmul(T)(T ch, int c)
 	return cast(immutable(T[]))chars;
 }
 
+static const
+{
+	wchar[6] singleLineBoxChars = ['┌', '─', '┐', '│', '└', '┘'];
+	wchar[6] roundBoxChars = ['╭', '─', '╮', '│', '╰', '╯'];
+	wchar[6] dashedBoxChars = ['┌', '╶', '┐', '╷', '└', '┘'];
+	wchar[6] doubleLineBoxChars = ['╔', '═', '╗', '║', '╚', '╝'];
+	wchar[6] fallbackBoxChars = ['+', '-', '+', '|', '+', '+'];
+}
+
+void drawBox(int x, int y, int w, int h, wchar[6] chars, ushort color = Color.white)
+{
 	putString([chars[0]], x, y, color);
 	putString(charmul(chars[1], w - 1), x + 1, y, color);
 	putString([chars[2]], x + w, y, color);
