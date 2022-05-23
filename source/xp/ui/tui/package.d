@@ -361,7 +361,8 @@ void tui()
 			}
 			else if (e.key == Key.arrowUp)
 			{
-				editSongField = (editSongField - 1) % 2;
+				import std.math;
+				editSongField = abs((editSongField - 1)) % 2;
 			}
 			else if (e.key == Key.arrowDown)
 			{
