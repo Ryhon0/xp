@@ -1,7 +1,12 @@
 module xp.ui.tui.drawing;
 
+import std.algorithm;
+import std.traits;
+import std.conv;
+import termbox;
 
-void putString(wstring s, int x, int y, ushort fg = Color.white, ushort bg = Color.black)
+void putString(T)(T s, int x, int y, ushort fg = Color.white, ushort bg = Color.black)
+		if (isSomeString!T)
 {
 	for (int i = 0; i < s.length; i++)
 	{
@@ -9,7 +14,8 @@ void putString(wstring s, int x, int y, ushort fg = Color.white, ushort bg = Col
 	}
 }
 
-void putStringVertical(wstring s, int x, int y, ushort fg = Color.white, ushort bg = Color.black)
+void putStringVertical(T)(T s, int x, int y, ushort fg = Color.white, ushort bg = Color.black)
+		if (isSomeString!T)
 {
 	for (int i = 0; i < s.length; i++)
 	{
@@ -17,20 +23,15 @@ void putStringVertical(wstring s, int x, int y, ushort fg = Color.white, ushort 
 	}
 }
 
-static wchar[6] singleLineBoxChars = ['┌', '─', '┐', '│', '└', '┘'];
-static wchar[6] roundBoxChars = ['╭', '─', '╮', '│', '╰', '╯'];
-static wchar[6] dashedBoxChars = ['┌', '╶', '┐', '╷', '└', '┘'];
-static wchar[6] doubleLineBoxChars = ['╔', '═', '╗', '║', '╚', '╝'];
-void drawBox(int x, int y, int w, int h, wchar[6] chars, ushort color = Color.white)
+immutable(T[]) charmul(T)(T ch, int c)
+	if(isSomeChar!T)
 {
-	wstring charmul(wchar ch, int c)
-	{
-		wchar[] chars;
-		chars.length = c;
-		chars[] = ch;
-		
-		return chars.to!wstring;
-	}
+	T[] chars;
+	chars.length = c;
+	chars[] = ch;
+
+	return cast(immutable(T[]))chars;
+}
 
 	putString([chars[0]], x, y, color);
 	putString(charmul(chars[1], w - 1), x + 1, y, color);
@@ -73,7 +74,7 @@ wstring progressBar(float value, int length, wchar[] chars = horizontalSmoothPro
 	return s;
 }
 
-float map(float value, float min1, float max1, float min2, float max2)
+float map(T)(T value, T min1, T max1, T min2, T max2) if (isFloatingPoint!T)
 {
 	return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
 }
