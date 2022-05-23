@@ -45,23 +45,25 @@ void tui()
 		state = State.SelectSong;
 	}
 
-	dstring addSongInput;
+	import xp.ui.tui.textentry;
+	TextEntry!dstring addSongInput;
+
 	dstring addSongError;
 	void addSong()
 	{
 		state = State.AddSong;
-		addSongInput = "";
+		addSongInput = new TextEntry!dstring();
 		addSongError = "";
 	}
 
-	dstring editSongTitle;
-	dstring editSongAuthor;
+	TextEntry!dstring editSongTitle;
+	TextEntry!dstring editSongAuthor;
 	int editSongField;
 	void editSong()
 	{
 		editSongField = 0;
-		editSongTitle = songs[selection].title.to!dstring;
-		editSongAuthor = songs[selection].author.to!dstring;
+		editSongTitle = new TextEntry!dstring(songs[selection].title.to!dstring);
+		editSongAuthor = new TextEntry!dstring(songs[selection].author.to!dstring);
 		state = State.EditSong;
 	}
 
@@ -210,11 +212,11 @@ void tui()
 			putString("URI:", x + 1, y + 1);
 			putString(addSongError, x + 1, y + 3, Color.red);
 
-			wstring ws = addSongInput.to!wstring;
+			auto ws = addSongInput.buffer;
 			putString(ws, x + 1, y + 2, Color.white, Color.black | Attribute.bright);
 			putString(charmul(' ', cast(int)(bw - ws.length - 1)), cast(int)(x + 1 + ws.length), y + 2,
 				Color.white, Color.black | Attribute.bright);
-			setCursor(cast(int)(x + 1 + ws.length), y + 2);
+			setCursor(cast(int)(x + 1 + addSongInput.cursor), y + 2);
 		}
 
 		// Edit song window
@@ -232,19 +234,19 @@ void tui()
 			putString("Author:", x + 1, y + 1);
 			putString("Title:", x + 1, y + 3);
 
-			wstring ws = editSongAuthor.to!wstring;
+			auto ws = editSongAuthor.buffer;
 			putString(ws, x + 1, y + 2, Color.white, Color.black | Attribute.bright);
 			putString(charmul(' ', cast(int)(bw - ws.length - 1)), cast(int)(x + 1 + ws.length), y + 2,
 				Color.white, Color.black | Attribute.bright);
 			if (editSongField == 0)
-				setCursor(cast(int)(x + 1 + ws.length), y + 2);
+				setCursor(cast(int)(x + 1 + editSongAuthor.cursor), y + 2);
 
-			ws = editSongTitle.to!wstring;
+			ws = editSongTitle.buffer;
 			putString(ws, x + 1, y + 4, Color.white, Color.black | Attribute.bright);
 			putString(charmul(' ', cast(int)(bw - ws.length - 1)), cast(int)(x + 1 + ws.length), y + 4,
 				Color.white, Color.black | Attribute.bright);
 			if (editSongField == 1)
-				setCursor(cast(int)(x + 1 + ws.length), y + 4);
+				setCursor(cast(int)(x + 1 + editSongTitle.cursor), y + 4);
 		}
 
 		// Bottom row info
@@ -273,7 +275,7 @@ void tui()
 			{
 				hideCursor();
 				selectSong();
-				addSongInput = "";
+				addSongInput = null;
 				addSongError = "";
 				continue;
 			}
@@ -286,7 +288,7 @@ void tui()
 				PlatformProvider prov = autoGetProviderForURI(uri);
 				if (prov is null)
 				{
-					addSongInput = "";
+					addSongInput.buffer = "";
 					addSongError = "Unable to handle URI";
 					continue;
 				}
@@ -329,26 +331,11 @@ void tui()
 					}
 
 				selectSong();
-				addSongInput = "";
+				addSongInput = null;
 				addSongError = "";
 				continue;
 			}
-			else if (e.key == Key.backspace || e.key == Key.backspace2)
-			{
-				if (addSongInput.length)
-				{
-					import std.string;
-
-					if (addSongInput.length == 1)
-						addSongInput = "";
-					else
-						addSongInput = addSongInput[0 .. addSongInput.length - 1];
-				}
-			}
-			else if (e.ch)
-			{
-				addSongInput ~= e.ch;
-			}
+			else addSongInput.handleInput(e);
 		}
 		else if (state == State.EditSong)
 		{
@@ -356,8 +343,7 @@ void tui()
 			{
 				hideCursor();
 				selectSong();
-				editSongAuthor = "";
-				editSongTitle = "";
+				editSongAuthor = editSongTitle = null;
 				continue;
 			}
 			else if (e.key == Key.enter)
@@ -365,15 +351,14 @@ void tui()
 				hideCursor();
 
 				SongInfo si = songs[selection];
-				si.author = editSongAuthor.to!string;
-				si.title = editSongTitle.to!string;
+				si.author = editSongAuthor.buffer.to!string;
+				si.title = editSongTitle.buffer.to!string;
 
 				updateSong(si);
 
 				songs = getSongs();
 				selectSong();
-				editSongAuthor = "";
-				editSongTitle = "";
+				editSongAuthor = editSongTitle = null;
 				continue;
 			}
 			else if (e.key == Key.arrowUp)
@@ -385,37 +370,9 @@ void tui()
 			{
 				editSongField = (editSongField + 1) % 2;
 			}
-			else if (e.key == Key.backspace || e.key == Key.backspace2)
+			else 
 			{
-				if (editSongField == 0)
-				{
-					alias str = editSongAuthor;
-					if (str.length)
-					{
-						if (str.length == 1)
-							str = "";
-						else
-							str = str[0 .. str.length - 1];
-					}
-				}
-				else
-				{
-					alias str = editSongTitle;
-					if (str.length)
-					{
-						if (str.length == 1)
-							str = "";
-						else
-							str = str[0 .. str.length - 1];
-					}
-				}
-			}
-			else if (e.ch)
-			{
-				if (editSongField == 0)
-					editSongAuthor ~= e.ch;
-				else
-					editSongTitle ~= e.ch;
+				(editSongField == 0 ? editSongAuthor : editSongTitle).handleInput(e);
 			}
 		}
 		else
