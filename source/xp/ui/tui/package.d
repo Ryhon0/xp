@@ -195,6 +195,7 @@ void tui()
 			int y = (h/2) - (bh/2);
 
 			drawBox(x,y,bw,bh, singleLineBoxChars);
+			clearBox(x+1,y+1,bw-2,bh-2);
 			putString("Add song", x + 1, y);
 			putString("URI:", x + 1, y + 2);
 			wstring ws = addsonginput.to!wstring;

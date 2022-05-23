@@ -45,6 +45,16 @@ immutable(T[]) charmul(T)(T ch, int c)
 	putString([chars[5]], x + w, y + h - 1, color);
 }
 
+void clearBox(int x, int y, int w, int h)
+{
+	string str = charmul(' ', w);
+
+	for(int i = 0; i<h; i++)
+	{
+		putString(str, x,y+i);
+	}
+}
+
 static wchar[] horizontalSmoothProgressChars = [
 	' ', '▏', '▎', '▍', '▌', '▋', '▊', '▉', '█'
 ];
