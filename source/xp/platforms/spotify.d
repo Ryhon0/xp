@@ -1,5 +1,6 @@
 module xp.platforms.spotify;
 
+import xp.platforms.youtube;
 import xp.platforms;
 import std.regex;
 
@@ -71,10 +72,14 @@ class SpotifyPlatform : PlatformProvider
 		SongInfo si = getSongInfo(uri);
 		string query = si.author ~ " - " ~ si.title;
 
-		auto jsonstr = execute([
-			"youtube-dl", "--print-json", "-f", "bestaudio",
-			"--recode-video", "ogg", "--embed-metadata", "-o",
-			tmpdir ~ "%(id)s.%(ext)s", "ytsearch:" ~ query
+
+		string[] args;
+		if(isYtDlpInstalled())
+			args ~= ["yt-dlp", "--sponsorblock-remove=music_offtopic"];
+		else args ~= "youtube-dl";
+
+		auto jsonstr = execute(args ~ ["--print-json", "-f", "bestaudio", "--no-playlist",
+			"--recode-video", "ogg", "--embed-metadata", "-o", tmpdir ~ "%(id)s.%(ext)s", uri
 		]).output;
 
 		JSONValue json = parseJSON(jsonstr);

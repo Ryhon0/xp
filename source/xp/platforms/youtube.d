@@ -2,6 +2,23 @@ module xp.platforms.youtube;
 import xp.platforms;
 import std.regex;
 
+bool isYtDlpInstalled()
+{	
+	// https://github.com/yt-dlp/yt-dlp/issues/3846
+	/*
+	import std.process;
+	import std.array;
+	import std.file;
+	string[] paths = environment.get("PATH", "").split(':');
+	foreach(path; paths)
+	{
+		if(exists(path ~ "/yt-dlp"))
+			return true;
+	}
+	*/
+	return false;
+}
+
 class YoutubePlatform : PlatformProvider
 {
 	mixin RegisterPlatformProvider;
@@ -58,8 +75,12 @@ class YoutubePlatform : PlatformProvider
 		if (!exists(tmpdir))
 			mkdir(tmpdir);
 
-		auto jsonstr = execute([
-			"youtube-dl", "--print-json", "-f", "bestaudio", "--no-playlist",
+		string[] args;
+		if(isYtDlpInstalled())
+			args ~= ["yt-dlp", "--sponsorblock-remove=music_offtopic"];
+		else args ~= "youtube-dl";
+
+		auto jsonstr = execute(args ~ ["--print-json", "-f", "bestaudio", "--no-playlist",
 			"--recode-video", "ogg", "--embed-metadata", "-o", tmpdir ~ "%(id)s.%(ext)s", uri
 		]).output;
 

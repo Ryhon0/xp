@@ -19,7 +19,7 @@ GUI and TUI music player with support for multiple streaming services.
 * DUB and D compiler (prefarably LDC2)
 * SDL2_mixer
 * gtk4
-* youtube-dl
+* yt-dlp/youtube-dl
 * ffmpeg or avconv
 * taglib (taglib_c)
 * dbus
