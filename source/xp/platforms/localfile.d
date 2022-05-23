@@ -42,17 +42,20 @@ class LocalfilePlatform : PlatformProvider
 		SongInfo si = new SongInfo();
 		si.uri = uri;
 
-		const TagLib_File* f = taglib_file_new(file.toStringz);
-		const(TagLib_Tag*) t = taglib_file_tag(f);
+		TagLib_File* f = taglib_file_new(file.toStringz);
+		TagLib_Tag* t = taglib_file_tag(f);
 		if(t != null)
 		{
 			si.title = taglib_tag_title(t).to!string;
 			si.author = taglib_tag_artist(t).to!string;
 		}
-		else
-		{
-			si.title = baseName(file);
-		}
+
+		taglib_file_free(f);
+		taglib_tag_free_strings();
+		taglib_free(cast(void*)t);
+
+		if(!si.title.length) si.title = baseName(file);
+		if(!si.author.length) si.author = "unknown";
 
 		si.provider = "localfile";
 		si.id = getId(uri);

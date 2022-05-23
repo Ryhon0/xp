@@ -55,12 +55,12 @@ void playFile(const char* path)
 {
 	import tag;
 
-	const TagLib_File* f = taglib_file_new(path);
+	TagLib_File* f = taglib_file_new(path);
 	const(TagLib_AudioProperties*) props = taglib_file_audioproperties(f);
 
 	lengthSecs = taglib_audioproperties_length(props);
 
-	taglib_free(cast(void*)f);
+	taglib_file_free(f);
 	taglib_free(cast(void*)props);
 	if(mus) Mix_FreeMusic(mus);
 
