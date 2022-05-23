@@ -94,3 +94,25 @@ void addSong(SongInfo si, string file)
 	st.bindAll(title, author, uri, id, provider, file);
 	st.execute();
 }
+
+void updateSong(SongInfo si)
+{
+	Statement st = db.prepare(
+		"UPDATE songlist SET title = :title, author = :author, uri = :uri 
+		WHERE provider = :provider AND id = :id");
+	
+	string title = si.title, author = si.author, uri = si.uri, id = si.id, provider = si.provider;
+	st.bindAll(title, author, uri, provider, id);
+	st.execute();
+}
+
+void updateSongFile(SongInfo si, string file)
+{
+	Statement st = db.prepare(
+		"UPDATE songlist SET file = :file 
+		WHERE provider = :provider AND id = :id");
+	
+	string id = si.id, provider = si.provider;
+	st.bindAll(file, provider, id);
+	st.execute();
+}

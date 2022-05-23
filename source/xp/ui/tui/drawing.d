@@ -26,6 +26,7 @@ void putStringVertical(T)(T s, int x, int y, ushort fg = Color.white, ushort bg 
 immutable(T[]) charmul(T)(T ch, int c)
 	if(isSomeChar!T)
 {
+	c = max(c,0);
 	T[] chars;
 	chars.length = c;
 	chars[] = ch;

@@ -12,12 +12,12 @@ import std.stdio;
 import std.conv;
 import termbox;
 
-
 enum State
 {
 	Player,
 	SelectSong,
-	AddSong
+	AddSong,
+	EditSong
 }
 
 void tui()
@@ -45,13 +45,24 @@ void tui()
 		state = State.SelectSong;
 	}
 
-	string addsonginput;
-	wstring addsongError;
+	dstring addSongInput;
+	dstring addSongError;
 	void addSong()
 	{
 		state = State.AddSong;
-		addsonginput = "";
-		addsongError = "";
+		addSongInput = "";
+		addSongError = "";
+	}
+
+	dstring editSongTitle;
+	dstring editSongAuthor;
+	int editSongField;
+	void editSong()
+	{
+		editSongField = 0;
+		editSongTitle = songs[selection].title.to!dstring;
+		editSongAuthor = songs[selection].author.to!dstring;
+		state = State.EditSong;
 	}
 
 	SongInfo currentSong;
@@ -80,12 +91,15 @@ void tui()
 		int h = height();
 
 		// Volume
-		import std.algorithm.mutation;
+		{
+			import std.algorithm.mutation;
 
-		wchar[] volchars = verticalSmoothProgressChars.dup;
-		wstring volbar = progressBar(1 - getVolume(), h - 1, volchars.reverse());
-		putStringVertical(volbar, 0, 0, Color.green | Attribute.bright, Color.white);
+			wchar[] volchars = verticalSmoothProgressChars.dup;
+			wstring volbar = progressBar(1 - getVolume(), h - 1, volchars.reverse());
+			putStringVertical(volbar, 0, 0, Color.green | Attribute.bright, Color.white);
+		}
 
+		// Song controls
 		if (currentSong !is null)
 		{
 			/// Progress
@@ -122,17 +136,11 @@ void tui()
 					putString(bar, i, h - 2, Color.blue | Attribute.bright, Color.white);
 					i += bar.length + 1;
 				}
-				else
-				{
-					wstring bar;
-					bar = progressBar(pos / len, barsize, ['─', '◯', '═']);
-					putString(bar, i, h - 2, Color.blue | Attribute.bright, Color.black);
-					i += bar.length + 1;
-				}
 
 				putString(lenstr, i, h - 2);
 			}
 
+			// Status
 			wstring status = isFinished() ? "■" : (isPaused() ? "▌▌" : "▶");
 			putString(status, 2, h - 2);
 
@@ -175,13 +183,15 @@ void tui()
 			else
 			{
 				putString("No songs found", 3, bh - 3, Color.red, Color.black);
-				putString("Use 'xp add <uri>' or press A to add songs", 3, bh - 2, Color.red, Color.black);
+				putString("Use 'xp add <uri>' or press A to add songs", 3, bh - 2, Color.red, Color
+						.black);
 			}
 			ushort bcol = state == State.SelectSong ? Color.white : Color.black | Attribute.bright;
 			drawBox(2, 0, w - 4, bh, roundBoxChars, bcol);
 			putString("Song list", 4, 0, bcol);
 
 			import xp;
+
 			wstring verstr = ("xp " ~ xpVersion).to!wstring;
 			putString(verstr, cast(int)(w - verstr.length - 2), bh - 1, bcol);
 		}
@@ -190,87 +200,204 @@ void tui()
 		if (state == State.AddSong)
 		{
 			int bw = 50;
-			int bh = 7;
-			int x = (w/2) - (bw/2);
-			int y = (h/2) - (bh/2);
+			int bh = 5;
+			int x = (w / 2) - (bw / 2);
+			int y = (h / 2) - (bh / 2);
 
-			drawBox(x,y,bw,bh, singleLineBoxChars);
-			clearBox(x+1,y+1,bw-2,bh-2);
+			drawBox(x, y, bw, bh, singleLineBoxChars);
+			clearBox(x + 1, y + 1, bw - 2, bh - 2);
 			putString("Add song", x + 1, y);
-			putString("URI:", x + 1, y + 2);
-			wstring ws = addsonginput.to!wstring;
-			putString(ws, x+1, y+3);
-			setCursor(cast(int)(x + 1 + ws.length), y+3);
-			putString(addsongError, x+1, y+4, Color.red);
+			putString("URI:", x + 1, y + 1);
+			putString(addSongError, x + 1, y + 3, Color.red);
+
+			wstring ws = addSongInput.to!wstring;
+			putString(ws, x + 1, y + 2, Color.white, Color.black | Attribute.bright);
+			putString(charmul(' ', cast(int)(bw - ws.length - 1)), cast(int)(x + 1 + ws.length), y + 2,
+				Color.white, Color.black | Attribute.bright);
+			setCursor(cast(int)(x + 1 + ws.length), y + 2);
 		}
-		else hideCursor();
+
+		// Edit song window
+		if (state == State.EditSong)
+		{
+			int bw = 50;
+			int bh = 6;
+			int x = (w / 2) - (bw / 2);
+			int y = (h / 2) - (bh / 2);
+
+			drawBox(x, y, bw, bh, singleLineBoxChars);
+			clearBox(x + 1, y + 1, bw - 2, bh - 2);
+
+			putString("Edit song", x + 1, y);
+			putString("Author:", x + 1, y + 1);
+			putString("Title:", x + 1, y + 3);
+
+			wstring ws = editSongAuthor.to!wstring;
+			putString(ws, x + 1, y + 2, Color.white, Color.black | Attribute.bright);
+			putString(charmul(' ', cast(int)(bw - ws.length - 1)), cast(int)(x + 1 + ws.length), y + 2,
+				Color.white, Color.black | Attribute.bright);
+			if (editSongField == 0)
+				setCursor(cast(int)(x + 1 + ws.length), y + 2);
+
+			ws = editSongTitle.to!wstring;
+			putString(ws, x + 1, y + 4, Color.white, Color.black | Attribute.bright);
+			putString(charmul(' ', cast(int)(bw - ws.length - 1)), cast(int)(x + 1 + ws.length), y + 4,
+				Color.white, Color.black | Attribute.bright);
+			if (editSongField == 1)
+				setCursor(cast(int)(x + 1 + ws.length), y + 4);
+		}
 
 		// Bottom row info
-		wstring info;
-		wstring[State] infos =
-			[
-				State.Player: " ↑↓ Volume  ←→ Seek  ␣ Play/Pause  C Change song  Q Exit",
-				State.SelectSong: " ↑↓ Change selection  ↵ Select song  R Reload list  A Add song  ESC Cancel",
-				State.AddSong: " ↵ Add song  ESC Cancel"
-			];
-		info = infos[state];
-		putString(info, 0, h-1, Color.black, Color.white);
+		{
+			wstring info;
+			wstring[State] infos =
+				[
+					State.Player: " ↑↓ Volume  ←→ Seek  ␣ Play/Pause  C Change song  Q Exit",
+					State.SelectSong: " ↑↓ Select  ↵ Play  R Reload  A Add song  E Edit  ESC Cancel",
+					State.AddSong: " ↵ Add song  ESC Cancel",
+					State.EditSong: " ↑↓ Select field  ↵ Save  ESC Cancel"
+				];
+			info = infos[state];
+			putString(info, 0, h - 1, Color.black, Color.white);
+		}
 
 		flush();
 		Event e;
 		peekEvent(&e, 1);
 
+		// Input
 		float voloffset = 0.02;
 		if (state == State.AddSong)
 		{
-			if(e.key == Key.esc)
+			if (e.key == Key.esc)
 			{
+				hideCursor();
 				selectSong();
+				addSongInput = "";
+				addSongError = "";
+				continue;
 			}
-			else if(e.key == Key.enter)
+			else if (e.key == Key.enter)
 			{
 				hideCursor();
 				import xp.platforms;
-				string uri = addsonginput;
+
+				string uri = addSongInput.to!string;
 				PlatformProvider prov = autoGetProviderForURI(uri);
-				if(prov is null)
+				if (prov is null)
 				{
-					addsonginput = "";
-					addsongError = "Unable to handle URI";
+					addSongInput = "";
+					addSongError = "Unable to handle URI";
 					continue;
 				}
 
 				SongInfo si = prov.getSongInfo(uri);
-				
+
 				int bw = 50;
 				int bh = 7;
-				int x = (w/2) - (bw/2);
-				int y = (h/2) - (bh/2);
-				putString(("Downloading \"" ~ si.author ~ " - " ~ si.title ~ "\"…").to!wstring, x + 1, y + 1);
+				int x = (w / 2) - (bw / 2);
+				int y = (h / 2) - (bh / 2);
+				putString(("Downloading \"" ~ si.author ~ " - " ~ si.title ~ "\"…")
+						.to!wstring, x + 1, y + 4);
 				flush();
 
 				string file = prov.downloadFile(uri);
 				import xp.library : dbAddSong = addSong;
+
 				dbAddSong(si, file);
+				songs = getSongs();
+
+				foreach(i,s; songs)
+					if(s.id == si.id && s.provider == si.provider)
+						selection = cast(int)i;
+
+				selectSong();
+				addSongInput = "";
+				addSongError = "";
+				continue;
+			}
+			else if (e.key == Key.backspace || e.key == Key.backspace2)
+			{
+				if (addSongInput.length)
+				{
+					import std.string;
+
+					if (addSongInput.length == 1)
+						addSongInput = "";
+					else
+						addSongInput = addSongInput[0 .. addSongInput.length - 1];
+				}
+			}
+			else if (e.ch)
+			{
+				addSongInput ~= e.ch;
+			}
+		}
+		else if (state == State.EditSong)
+		{
+			if (e.key == Key.esc)
+			{
+				hideCursor();
+				selectSong();
+				editSongAuthor = "";
+				editSongTitle = "";
+				continue;
+			}
+			else if (e.key == Key.enter)
+			{
+				hideCursor();
+
+				SongInfo si = songs[selection];
+				si.author = editSongAuthor.to!string;
+				si.title = editSongTitle.to!string;
+
+				updateSong(si);
 
 				songs = getSongs();
 				selectSong();
+				editSongAuthor = "";
+				editSongTitle = "";
 				continue;
 			}
-			else if(e.key == Key.backspace || e.key == Key.backspace2)
+			else if (e.key == Key.arrowUp)
 			{
-				if(addsonginput.length)
+				editSongField = (editSongField - 1) % 2;
+			}
+			else if (e.key == Key.arrowDown)
+			{
+				editSongField = (editSongField + 1) % 2;
+			}
+			else if (e.key == Key.backspace || e.key == Key.backspace2)
+			{
+				if (editSongField == 0)
 				{
-					import std.string;
-					if(addsonginput.length == 1)
-						addsonginput = "";
-					else
-						addsonginput = addsonginput[0..addsonginput.length - 2];
+					alias str = editSongAuthor;
+					if (str.length)
+					{
+						if (str.length == 1)
+							str = "";
+						else
+							str = str[0 .. str.length - 1];
+					}
+				}
+				else
+				{
+					alias str = editSongTitle;
+					if (str.length)
+					{
+						if (str.length == 1)
+							str = "";
+						else
+							str = str[0 .. str.length - 1];
+					}
 				}
 			}
-			else if(e.ch)
+			else if (e.ch)
 			{
-				addsonginput ~= e.ch;
+				if (editSongField == 0)
+					editSongAuthor ~= e.ch;
+				else
+					editSongTitle ~= e.ch;
 			}
 		}
 		else
@@ -333,6 +460,10 @@ void tui()
 			else if (e.ch == 'a')
 			{
 				addSong();
+			}
+			else if (e.ch == 'e')
+			{
+				editSong();
 			}
 			else if (e.key == Key.enter || e.key == Key.space)
 			{
