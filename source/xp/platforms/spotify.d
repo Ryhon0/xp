@@ -31,7 +31,6 @@ class SpotifyPlatform : PlatformProvider
 		import std.conv;
 		import arrogant;
 
-		SongInfo si = new SongInfo();
 		Arrogant arr = Arrogant();
 
 		string html = get(uri).to!string;
@@ -44,11 +43,24 @@ class SpotifyPlatform : PlatformProvider
 			return n["content"].get;
 		}
 
-		si.title = getOGValue("og:title");
-		si.author = getOGValue("og:description").split(" · ")[0];
+		SongInfo si = new SongInfo();
+
 		si.uri = uri;
 		si.id = getId(uri);
 		si.provider = this.id;
+
+		si.title = getOGValue("og:title");
+		si.author = getOGValue("og:description").split(" · ")[0];
+
+		import std.file;
+		import standardpaths;
+		string coverdir = writablePath(StandardPath.data, FolderFlag.create) ~ "/xp/covers/";
+		if (!exists(coverdir))
+			mkdir(coverdir);
+		string coverpath = coverdir ~ si.id ~ ".jpg";
+		import std.net.curl;
+		download(getOGValue("og:image"), coverpath);
+		si.thumbnail = coverpath;
 
 		return si;
 	}
@@ -66,7 +78,7 @@ class SpotifyPlatform : PlatformProvider
 		import standardpaths;
 		import std.file;
 
-		string tmpdir = writablePath(StandardPath.cache, FolderFlag.create) ~ "/xp/";
+		string tmpdir = writablePath(StandardPath.cache, FolderFlag.create) ~ "/xp/"; 
 		if (!exists(tmpdir))
 			mkdir(tmpdir);
 

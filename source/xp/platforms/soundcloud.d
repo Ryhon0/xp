@@ -39,11 +39,23 @@ class SoundCloudPlatform : PlatformProvider
 		JSONValue j = parseJSON(json);
 
 		SongInfo si = new SongInfo();
-		si.author = j["author_name"].str;
-		si.title = j["title"].str[0 .. $ - si.author.length - 4];
+
 		si.uri = uri;
 		si.id = getId(uri);
 		si.provider = this.id;
+
+		si.author = j["author_name"].str;
+		si.title = j["title"].str[0 .. $ - si.author.length - 4];
+		
+		import std.file;
+		import standardpaths;
+		string coverdir = writablePath(StandardPath.data, FolderFlag.create) ~ "/xp/covers/";
+		if (!exists(coverdir))
+			mkdir(coverdir);
+		string coverpath = coverdir ~ si.id ~ ".jpg";
+		import std.net.curl;
+		download(j["thumbnail_url"].str, coverpath);
+		si.thumbnail = coverpath;
 
 		return si;
 	}

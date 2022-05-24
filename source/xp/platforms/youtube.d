@@ -49,11 +49,23 @@ class YoutubePlatform : PlatformProvider
 		JSONValue j = parseJSON(json);
 
 		SongInfo si = new SongInfo();
-		si.title = j["title"].str;
-		si.author = j["author_name"].str;
+
 		si.uri = uri;
 		si.id = getId(uri);
 		si.provider = "youtube";
+
+		si.title = j["title"].str;
+		si.author = j["author_name"].str;
+
+		import std.file;
+		import standardpaths;
+		string coverdir = writablePath(StandardPath.data, FolderFlag.create) ~ "/xp/covers/";
+		if (!exists(coverdir))
+			mkdir(coverdir);
+		string coverpath = coverdir ~ si.id ~ ".jpg";
+		import std.net.curl;
+		download(j["thumbnail_url"].str, coverpath);
+		si.thumbnail = coverpath;
 
 		return si;
 	}
