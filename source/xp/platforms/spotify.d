@@ -53,7 +53,7 @@ class SpotifyPlatform : PlatformProvider
 		return si;
 	}
 
-	override string downloadFile(string uri)
+	override string downloadFile(SongInfo si)
 	{
 		import std.process;
 		import std.string;
@@ -70,9 +70,7 @@ class SpotifyPlatform : PlatformProvider
 		if (!exists(tmpdir))
 			mkdir(tmpdir);
 
-		SongInfo si = getSongInfo(uri);
 		string query = si.author ~ " - " ~ si.title;
-
 
 		string[] args;
 		if(isYtDlpInstalled())

@@ -49,9 +49,9 @@ int main(string[] args)
 			
 			SongInfo si = prov.getSongInfo(uri);
 			writeln("Downloading " ~ si.author ~ " - " ~ si.title);
-			string file = prov.downloadFile(uri);
+			si.file = prov.downloadFile(si);
 
-			addSong(si, file);
+			addSong(si);
 
 			return 0;
 		}

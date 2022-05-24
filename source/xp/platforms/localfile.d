@@ -62,9 +62,10 @@ class LocalfilePlatform : PlatformProvider
 		return si;
 	}
 
-	override string downloadFile(string uri)
+	override string downloadFile(SongInfo si)
 	{
 		import std.algorithm;
+		string uri = si.uri;
 
 		if(uri.startsWith("file://"))
 			uri = uri[7..$];

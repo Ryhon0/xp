@@ -48,7 +48,7 @@ class SoundCloudPlatform : PlatformProvider
 		return si;
 	}
 
-	override string downloadFile(string uri)
+	override string downloadFile(SongInfo si)
 	{
 		import std.process;
 		import std.string;
@@ -60,6 +60,8 @@ class SoundCloudPlatform : PlatformProvider
 
 		import standardpaths;
 		import std.file;
+
+		string uri = si.uri;
 
 		string datadir = writablePath(StandardPath.data, FolderFlag.create) ~ "/xp/songs/";
 		if (!exists(datadir))

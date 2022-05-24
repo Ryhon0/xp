@@ -58,7 +58,7 @@ class YoutubePlatform : PlatformProvider
 		return si;
 	}
 
-	override string downloadFile(string uri)
+	override string downloadFile(SongInfo si)
 	{
 		import std.process;
 		import std.string;
@@ -71,6 +71,7 @@ class YoutubePlatform : PlatformProvider
 		import standardpaths;
 		import std.file;
 
+		string uri = si.uri;
 		string tmpdir = writablePath(StandardPath.cache, FolderFlag.create) ~ "/xp/";
 		if (!exists(tmpdir))
 			mkdir(tmpdir);

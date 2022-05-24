@@ -40,8 +40,8 @@ class OpenSongDialog : Dialog
 			destroy();
 			return;
 		}
-
-		string file = prov.downloadFile(uri);
+		SongInfo si = prov.getSongInfo(uri);
+		string file = prov.downloadFile(si);
 
 		import xp.player;
 		import std.string;

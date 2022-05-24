@@ -317,10 +317,10 @@ void tui()
 						.to!wstring, x + 1, y + 4);
 				flush();
 
-				string file = prov.downloadFile(uri);
+				si.file = prov.downloadFile(si);
 				import xp.library : dbAddSong = addSong;
 
-				dbAddSong(si, file);
+				dbAddSong(si);
 				songs = getSongs();
 
 				foreach(i,s; songs)

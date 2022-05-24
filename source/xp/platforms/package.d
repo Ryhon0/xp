@@ -8,7 +8,7 @@ abstract class PlatformProvider
 	abstract bool canHandle(string uri);
 	abstract string getId(string uri);
 	abstract SongInfo getSongInfo(string uri);
-	abstract string downloadFile(string uri);
+	abstract string downloadFile(SongInfo si);
 }
 
 class SongInfo
