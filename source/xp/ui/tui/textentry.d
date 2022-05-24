@@ -33,7 +33,9 @@ class TextEntry(T = dstring) if (isSomeString!T)
 	{
 		if (e.key == Key.backspace || e.key == Key.backspace2)
 		{
-			if (cursor == buf.length)
+			if(buf.length == 0)
+				return false;
+			else if (cursor == buf.length)
 				buf = buf[0 .. $ - 1];
 			else if (cursor != 0)
 				buf = buf[0 .. cursor - 1] ~ buf[cursor .. $];
