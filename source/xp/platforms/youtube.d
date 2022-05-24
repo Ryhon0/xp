@@ -56,6 +56,9 @@ class YoutubePlatform : PlatformProvider
 
 		si.title = j["title"].str;
 		si.author = j["author_name"].str;
+		import std.algorithm;
+		if(si.author.endsWith(" - Topic"))
+			si.author = si.author[0..$ - " - Topic".length];
 
 		import std.file;
 		import standardpaths;
