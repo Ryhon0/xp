@@ -47,8 +47,12 @@ class TextEntry(T = dstring) if (isSomeString!T)
 		else if (e.key == Key.arrowRight)
 		{
 			cursor = min(cursor + 1, buf.length);
+		} else if(e.key == Key.space)
+		{
+			e.ch = ' ';
 		}
-		else if (e.ch)
+		
+		if (e.ch)
 		{
 			TChar ch = e.ch.to!TChar;
 
