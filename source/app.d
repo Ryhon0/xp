@@ -56,6 +56,34 @@ int main(string[] args)
 			return 0;
 		}
 
+		// Fetches all the songs again
+		if(cmd == "refreshall")
+		{
+			import xp.platforms;
+			SongInfo[] songs = getSongs();
+			foreach(s; songs)
+			{
+				writeln("Refreshing " ~ s.author ~ " - " ~ s.title ~ " (" ~ s.uri ~ ")");
+				PlatformProvider provider = autoGetProviderForURI(s.uri);
+				if(provider is null)
+				{
+					writeln("Could not find provider for " ~ s.uri);
+					continue;
+				}
+
+				SongInfo newSi = provider.getSongInfo(s.uri);
+				if(newSi.file != null)
+				{
+					writeln("Downloading...");
+					newSi.file = provider.downloadFile(newSi);
+				}
+
+				removeSong(s);
+				addSong(newSi);
+			}
+			return 0;
+		}
+
 		if(cmd == "tui")
 		{
 			import xp.ui.tui;

@@ -72,7 +72,7 @@ void tui()
 	{
 		SongInfo song = songs[selection];
 		currentSong = song;
-		string file = getSongFile(song);
+		string file = song.file;
 		playFile(file.toStringz);
 		seek(0);
 		resume();

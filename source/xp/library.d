@@ -139,20 +139,11 @@ bool isInLibrary(SongInfo song)
 	return !r.empty;
 }
 
-string getSongFile(SongInfo song)
+/// Removes song from database, DOES NOT REMOVE ASSOCIATED FILES
+void removeSong(SongInfo si)
 {
-	Statement st = db.prepare(
-		"SELECT file FROM songlist WHERE provider = :provider AND id = :id");
-	string provider = song.provider, id = song.id;
-	st.bindAll(provider, id);
-
-	ResultRange r = st.execute();
-
-	if (r.empty)
-		return null;
-
-	Row rw = r.front();
-	return rw["file"].as!string;
+	db.execute("DELETE FROM songlist WHERE provider = :provider AND id = :id",
+		si.provider, si.id);
 }
 
 void addSong(SongInfo si)
