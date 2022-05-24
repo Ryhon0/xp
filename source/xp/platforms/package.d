@@ -13,11 +13,15 @@ abstract class PlatformProvider
 
 class SongInfo
 {
+	import xp.library : DBVersion, DBKey;
+
 	string title;
 	string author;
 	string uri;
-	string id;
-	string provider;
+	string file;
+	@DBKey string id;
+	@DBKey string provider;
+	@DBVersion(1) string thumbnail;
 }
 
 template RegisterPlatformProvider()
