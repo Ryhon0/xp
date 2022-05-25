@@ -38,8 +38,9 @@ void tui()
 		flush();
 	}
 
+	import xp.ui.tui.scrollist;
+	ScrollList songScrollList = new ScrollList();
 	SongInfo[] songs;
-	int selection = 0;
 	void selectSong()
 	{
 		state = State.SelectSong;
@@ -62,15 +63,16 @@ void tui()
 	void editSong()
 	{
 		editSongField = 0;
-		editSongTitle = new TextEntry!dstring(songs[selection].title.to!dstring);
-		editSongAuthor = new TextEntry!dstring(songs[selection].author.to!dstring);
+		SongInfo song = songs[songScrollList.cursor];
+		editSongTitle = new TextEntry!dstring(song.title.to!dstring);
+		editSongAuthor = new TextEntry!dstring(song.author.to!dstring);
 		state = State.EditSong;
 	}
 
 	SongInfo currentSong;
 	void selectCurrentSong()
 	{
-		SongInfo song = songs[selection];
+		SongInfo song = songs[songScrollList.cursor];
 		currentSong = song;
 		string file = song.file;
 		playFile(file.toStringz);
@@ -154,20 +156,26 @@ void tui()
 		// Song list
 		{
 			int bh = currentSong is null ? h - 1 : h - 3;
+
+			songScrollList.height = bh - 2;
+			songScrollList.itemcount = cast(int)songs.length;
+
+			clearBox(2, 0, w - 3, bh);
 			if (songs.length)
 			{
 				for (int i = 0; i < bh - 1; i++)
 				{
-					if (i == songs.length)
+					int id = i + songScrollList.offset;
+					if (id >= songs.length)
 						break;
 
 					int y = bh - 2 - i;
 					int x = 3;
-					SongInfo song = songs[i];
-					ushort col = i % 2 == 0 ? Color.white : Color.black | Attribute.bright;
+					SongInfo song = songs[id];
+					ushort col = id % 2 == 0 ? Color.white : Color.black | Attribute.bright;
 					ushort bg = Color.black;
 
-					if (selection == i)
+					if (songScrollList.cursor == id)
 					{
 						putString(">", x, y, Color.red | Attribute.bold, Color.black);
 						x++;
@@ -189,8 +197,16 @@ void tui()
 						.black);
 			}
 			ushort bcol = state == State.SelectSong ? Color.white : Color.black | Attribute.bright;
-			drawBox(2, 0, w - 4, bh, roundBoxChars, bcol);
-			putString("Song list", 4, 0, bcol);
+			drawBox(2, 0, w - 3, bh, roundBoxChars, bcol);
+
+			// Scroll bar
+			if(songScrollList.height < songs.length)
+			{
+				float scrollv = (songScrollList.cursor / cast(float)songs.length);
+				scrollv = -(0 - scrollv);
+				putStringVertical(progressBar(scrollv, bh-2, ['║','◯','║']), w-1, 1, bcol);
+				putString("Song list", 4, 0, bcol);
+			}
 
 			import xp;
 
@@ -302,7 +318,7 @@ void tui()
 					foreach(i,s; songs)
 						if(s.id == si.id && s.provider == si.provider)
 						{
-							selection = cast(int)i;
+							songScrollList.cursor = cast(int)i;
 							break;
 						}
 
@@ -326,7 +342,7 @@ void tui()
 				foreach(i,s; songs)
 					if(s.id == si.id && s.provider == si.provider)
 					{
-						selection = cast(int)i;
+						songScrollList.cursor = cast(int)i;
 						break;
 					}
 
@@ -350,7 +366,7 @@ void tui()
 			{
 				hideCursor();
 
-				SongInfo si = songs[selection];
+				SongInfo si = songs[songScrollList.cursor];
 				si.author = editSongAuthor.buffer.to!string;
 				si.title = editSongTitle.buffer.to!string;
 
@@ -401,11 +417,11 @@ void tui()
 				if (e.x > 2 && e.y > 0)
 				{
 					int click = -((e.y + 2) - bh);
-					putString(click.to!wstring, 4, 4);
+					click += songScrollList.offset;
 					if (click < songs.length && click > -1)
 					{
-						selection = click;
-						if (currentSong != songs[selection])
+						songScrollList.cursor = click;
+						if (currentSong != songs[songScrollList.cursor])
 						{
 							selectCurrentSong();
 							continue;
@@ -416,15 +432,9 @@ void tui()
 		}
 		if (state == State.SelectSong)
 		{
-			if (e.key == Key.arrowUp || e.ch == '+' || e.key == Key.mouseWheelUp)
-			{
-				selection = clamp(selection + 1, 0, cast(int) songs.length - 1);
-			}
-			else if (e.key == Key.arrowDown || e.ch == '-' || e.key == Key.mouseWheelDown)
-			{
-				selection = clamp(selection - 1, 0, cast(int) songs.length - 1);
-			}
-			else if (e.key == Key.esc || e.ch == 'c')
+			songScrollList.handleEvent(e);
+
+			if (e.key == Key.esc || e.ch == 'c')
 			{
 				state = State.Player;
 			}
@@ -436,7 +446,7 @@ void tui()
 			{
 				addSong();
 			}
-			else if (e.ch == 'e')
+			else if (e.key == Key.f2 || e.ch == 'e')
 			{
 				editSong();
 			}
