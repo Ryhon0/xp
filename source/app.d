@@ -72,7 +72,7 @@ int main(string[] args)
 				}
 
 				SongInfo newSi = provider.getSongInfo(s.uri);
-				if(newSi.file != null)
+				if(newSi.file == null || newSi.file.length == 0)
 				{
 					writeln("Downloading...");
 					newSi.file = provider.downloadFile(newSi);
