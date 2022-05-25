@@ -26,7 +26,7 @@ class YoutubePlatform : PlatformProvider
 	string id = "spotify";
 
 	/// https://stackoverflow.com/a/37704433
-	auto videoRegex = ctRegex!r"^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)(?P<id>[\w\-]+)(\S+)?$";
+	auto videoRegex = ctRegex!r"^((?:https?:)?\/\/)?((?:www|m|music)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)(?P<id>[\w\-]+)(\S+)?$";
 	override bool canHandle(string uri)
 	{
 		auto m = matchFirst(uri, videoRegex);
