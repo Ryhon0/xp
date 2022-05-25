@@ -284,7 +284,7 @@ void tui()
 				hideCursor();
 				import xp.platforms;
 
-				string uri = addSongInput.to!string;
+				string uri = addSongInput.buffer.to!string;
 				PlatformProvider prov = autoGetProviderForURI(uri);
 				if (prov is null)
 				{
