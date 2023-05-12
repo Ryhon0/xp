@@ -15,6 +15,8 @@ class ScrollList
 
 	void handleEvent(Event ev)
 	{
+		if(itemcount == 0) return;
+
 		if(ev.key == Key.arrowUp || ev.key == Key.mouseWheelUp)
 		{
 			if(reversed) cursor++;
