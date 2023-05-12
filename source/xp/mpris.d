@@ -28,16 +28,12 @@ void mprisPoll()
 
 class MediaPlayer2
 {
-	import xp.ui.gtk.mainwindow;
-
 	void Raise()
 	{
-		MainWindow.instance.show();
 	}
 
 	void Quit()
 	{
-		MainWindow.instance.close();
 	}
 }
 

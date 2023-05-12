@@ -31,7 +31,7 @@ int main(string[] args)
 			}
 			return 0;
 		}
-		
+
 		if (cmd == "add")
 		{
 			string uri = args[2];
@@ -46,7 +46,7 @@ int main(string[] args)
 
 			if (prov is null)
 				return 1;
-			
+
 			SongInfo si = prov.getSongInfo(uri);
 			writeln("Downloading " ~ si.author ~ " - " ~ si.title);
 			si.file = prov.downloadFile(si);
@@ -57,22 +57,23 @@ int main(string[] args)
 		}
 
 		// Fetches all the songs again
-		if(cmd == "refreshall")
+		if (cmd == "refreshall")
 		{
 			import xp.platforms;
+
 			SongInfo[] songs = getSongs();
-			foreach(s; songs)
+			foreach (s; songs)
 			{
 				writeln("Refreshing " ~ s.author ~ " - " ~ s.title ~ " (" ~ s.uri ~ ")");
 				PlatformProvider provider = autoGetProviderForURI(s.uri);
-				if(provider is null)
+				if (provider is null)
 				{
 					writeln("Could not find provider for " ~ s.uri);
 					continue;
 				}
 
 				SongInfo newSi = provider.getSongInfo(s.uri);
-				if(newSi.file == null || newSi.file.length == 0)
+				if (newSi.file == null || newSi.file.length == 0)
 				{
 					writeln("Downloading...");
 					newSi.file = provider.downloadFile(newSi);
@@ -83,23 +84,14 @@ int main(string[] args)
 			}
 			return 0;
 		}
+	}
+	else
+	{
+		import xp.ui.tui;
 
-		if(cmd == "tui")
-		{
-			import xp.ui.tui;
-			tui();
-			return 0;
-		}
+		tui();
+		return 0;
 	}
 
-	import xp.ui.gtk.mainwindow;
-	import gio.Application : GioApplication = Application;
-	import gtk.Application;
-
-	auto application = new Application("link.ryhn.xp", GApplicationFlags.FLAGS_NONE);
-	application.addOnActivate(delegate void(GioApplication app) {
-		auto win = new MainWindow(application);
-		win.show();
-	});
-	return application.run([]);
+	return 0;
 }
