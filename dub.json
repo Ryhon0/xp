@@ -4,7 +4,6 @@
 	],
 	"copyright": "Copyright © 2022, ryhon",
 	"dependencies": {
-		"arrogant": "~>0.3.0",
 		"bindbc-sdl": "~>1.1.2",
 		"d2sqlite3": "~>1.0.0",
 		"ddbus": "~master",

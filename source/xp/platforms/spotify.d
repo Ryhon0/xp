@@ -10,6 +10,8 @@ class SpotifyPlatform : PlatformProvider
 	mixin RegisterPlatformProvider;
 
 	string id = "spotify";
+	string accessToken = null;
+	long tokenExpires = 0;
 
 	auto songRegex = ctRegex!r"^http[s]:\/\/open.spotify.com\/track\/(?P<id>[^?]*)";
 	override bool canHandle(string uri)
@@ -26,40 +28,45 @@ class SpotifyPlatform : PlatformProvider
 
 	override SongInfo getSongInfo(string uri)
 	{
+		string id = getId(uri);
+
+		checkToken();
+
 		import std.net.curl;
-		import std.string;
-		import std.conv;
-		import arrogant;
+		import std.json;
 
-		Arrogant arr = Arrogant();
-
-		string html = get(uri).to!string;
-		Tree tree = arr.parse(html);
-		Node head = tree.head();
-
-		string getOGValue(string key)
+		HTTP c = HTTP();
+		c.addRequestHeader("Authorization", "Bearer " ~ accessToken);
+		JSONValue j;
+		try
 		{
-			Node n = head.byAttribute("property", key)[0];
-			return n["content"].get;
+			j = parseJSON(get("https://api.spotify.com/v1/tracks/" ~ id, c));	
 		}
-
+		catch(Exception)
+		{
+			// Likely an invalid song ID
+			return null;
+		}
+		
 		SongInfo si = new SongInfo();
 
 		si.uri = uri;
-		si.id = getId(uri);
+		si.id = id;
 		si.provider = this.id;
-
-		si.title = getOGValue("og:title");
-		si.author = getOGValue("og:description").split(" · ")[0];
+		si.title = j["name"].str;
+		si.author = j["artists"][0]["name"].str;
+		si.author = j["artists"][0]["name"].str;
 
 		import std.file;
 		import standardpaths;
+
 		string coverdir = writablePath(StandardPath.data, FolderFlag.create) ~ "/xp/covers/";
 		if (!exists(coverdir))
 			mkdir(coverdir);
 		string coverpath = coverdir ~ si.id ~ ".jpg";
 		import std.net.curl;
-		download(getOGValue("og:image"), coverpath);
+
+		download(j["album"]["images"][0]["url"].str, coverpath);
 		si.thumbnail = coverpath;
 
 		return si;
@@ -78,21 +85,24 @@ class SpotifyPlatform : PlatformProvider
 		import standardpaths;
 		import std.file;
 
-		string tmpdir = writablePath(StandardPath.cache, FolderFlag.create) ~ "/xp/"; 
+		string tmpdir = writablePath(StandardPath.cache, FolderFlag.create) ~ "/xp/";
 		if (!exists(tmpdir))
 			mkdir(tmpdir);
 
 		string query = si.author ~ " - " ~ si.title;
 
 		string[] args;
-		if(isYtDlpInstalled())
+		if (isYtDlpInstalled())
 			args ~= ["yt-dlp", "--sponsorblock-remove=music_offtopic"];
-		else args ~= "youtube-dl";
+		else
+			args ~= "youtube-dl";
 
-		auto jsonstr = execute(args ~ ["--print-json", "-f", "bestaudio", "--no-playlist",
-			"--recode-video", "ogg", "--embed-metadata", "-o", tmpdir ~ "%(id)s.%(ext)s", "ytsearch:"~query
-		]).output;
-	
+		auto jsonstr = execute(args ~ [
+				"--print-json", "-f", "bestaudio", "--no-playlist",
+				"--recode-video", "ogg", "--embed-metadata", "-o",
+				tmpdir ~ "%(id)s.%(ext)s", "ytsearch:" ~ query
+			]).output;
+
 		JSONValue json = parseJSON(jsonstr);
 		string filepath = json["_filename"].str;
 		ulong exlen = extension(filepath).length;
@@ -109,17 +119,40 @@ class SpotifyPlatform : PlatformProvider
 
 		// Embed spotify metadata
 		import tag;
+
 		TagLib_File* f = taglib_file_new(filepath.toStringz);
 		TagLib_Tag* t = taglib_file_tag(f);
 		taglib_tag_set_title(t, si.title.toStringz);
 		taglib_tag_set_artist(t, si.author.toStringz);
 		// No album art in taglib_c :(
 		taglib_file_save(f);
-		
+
 		taglib_tag_free_strings();
 		taglib_file_free(f);
 
 		return filepath;
+	}
+
+	void checkToken()
+	{
+		import std.datetime.systime : Clock, SysTime;
+
+		// Why is this the easiest way to get Unix time in msecs?
+		long t = (Clock.currTime - SysTime.fromUnixTime(0)).total!"msecs";
+
+		if (accessToken == null || t >= tokenExpires)
+			getAccessToken();
+	}
+
+	void getAccessToken()
+	{
+		import std.net.curl;
+
+		import std.json;
+
+		JSONValue j = parseJSON(get("https://open.spotify.com/get_access_token"));
+		accessToken = j["accessToken"].str;
+		tokenExpires = j["accessTokenExpirationTimestampMs"].integer;
 	}
 }
 
