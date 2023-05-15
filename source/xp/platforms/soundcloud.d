@@ -79,8 +79,9 @@ class SoundCloudPlatform : PlatformProvider
 		if (!exists(datadir))
 			mkdir(datadir);
 
+		import xp.platforms.youtube : getYoutubeDL;
 		auto jsonstr = execute([
-			"youtube-dl", "--print-json", "-f", "bestaudio",
+			getYoutubeDL, "--print-json", "-f", "bestaudio",
 			"--embed-metadata", "-o", datadir ~ "%(id)s.%(ext)s", uri
 		]).output;
 

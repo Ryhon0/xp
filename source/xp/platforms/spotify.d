@@ -91,11 +91,13 @@ class SpotifyPlatform : PlatformProvider
 
 		string query = si.author ~ " - " ~ si.title;
 
+		import xp.platforms.youtube : getYoutubeDL, isDLP;
 		string[] args;
-		if (isYtDlpInstalled())
-			args ~= ["yt-dlp", "--sponsorblock-remove=music_offtopic"];
-		else
-			args ~= "youtube-dl";
+		string exe = getYoutubeDL();
+		args ~= exe;
+
+		if (exe.isDLP)
+			args ~= "--sponsorblock-remove=music_offtopic";
 
 		auto jsonstr = execute(args ~ [
 				"--print-json", "-f", "bestaudio", "--no-playlist",

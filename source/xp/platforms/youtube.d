@@ -2,21 +2,36 @@ module xp.platforms.youtube;
 import xp.platforms;
 import std.regex;
 
-bool isYtDlpInstalled()
-{	
-	// https://github.com/yt-dlp/yt-dlp/issues/3846
-	/*
-	import std.process;
-	import std.array;
-	import std.file;
-	string[] paths = environment.get("PATH", "").split(':');
-	foreach(path; paths)
+string getYoutubeDL()
+{
+	string which(string prog)
 	{
-		if(exists(path ~ "/yt-dlp"))
-			return true;
+		import std.process;
+		import std.array;
+		import std.file;
+
+		string[] paths = environment.get("PATH", "").split(':');
+		foreach (path; paths)
+		{
+			string exepath = path ~ "/" ~ prog;
+			import std.stdio;
+			if (exists(exepath))
+				return exepath;
+		}
+
+		return null;
 	}
-	*/
-	return false;
+
+	string path = which("yt-dlp");
+	if(!path) path = which("youtube-dl");
+
+	return path;
+}
+
+bool isDLP(string path)
+{
+	import std.string : endsWith;
+	return path.endsWith("yt-dlp");
 }
 
 class YoutubePlatform : PlatformProvider
@@ -57,16 +72,19 @@ class YoutubePlatform : PlatformProvider
 		si.title = j["title"].str;
 		si.author = j["author_name"].str;
 		import std.algorithm;
-		if(si.author.endsWith(" - Topic"))
-			si.author = si.author[0..$ - " - Topic".length];
+
+		if (si.author.endsWith(" - Topic"))
+			si.author = si.author[0 .. $ - " - Topic".length];
 
 		import std.file;
 		import standardpaths;
+
 		string coverdir = writablePath(StandardPath.data, FolderFlag.create) ~ "/xp/covers/";
 		if (!exists(coverdir))
 			mkdir(coverdir);
 		string coverpath = coverdir ~ si.id ~ ".jpg";
 		import std.net.curl;
+
 		download(j["thumbnail_url"].str, coverpath);
 		si.thumbnail = coverpath;
 
@@ -92,13 +110,17 @@ class YoutubePlatform : PlatformProvider
 			mkdir(tmpdir);
 
 		string[] args;
-		if(isYtDlpInstalled())
-			args ~= ["yt-dlp", "--sponsorblock-remove=music_offtopic"];
-		else args ~= "youtube-dl";
+		string exe = getYoutubeDL();
+		args ~= exe;
 
-		auto jsonstr = execute(args ~ ["--print-json", "-f", "bestaudio", "--no-playlist",
-			"--recode-video", "ogg", "--embed-metadata", "-o", tmpdir ~ "%(id)s.%(ext)s", uri
-		]).output;
+		if (exe.isDLP)
+			args ~= "--sponsorblock-remove=music_offtopic";
+
+		auto jsonstr = execute(args ~ [
+				"--print-json", "-f", "bestaudio", "--no-playlist",
+				"--recode-video", "ogg", "--embed-metadata", "-o",
+				tmpdir ~ "%(id)s.%(ext)s", uri
+			]).output;
 
 		JSONValue json = parseJSON(jsonstr);
 		string filepath = json["_filename"].str;
