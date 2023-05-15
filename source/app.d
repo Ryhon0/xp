@@ -6,15 +6,12 @@ import std.json;
 int main(string[] args)
 {
 	import xp.player;
-
 	playerInit();
 
 	import xp.library;
-
 	libraryInit();
 
 	import xp.mpris;
-
 	registerMpris();
 
 	if (args.length > 1)
@@ -31,8 +28,7 @@ int main(string[] args)
 			}
 			return 0;
 		}
-
-		if (cmd == "add")
+		else if (cmd == "add")
 		{
 			string uri = args[2];
 
@@ -55,9 +51,8 @@ int main(string[] args)
 
 			return 0;
 		}
-
 		// Fetches all the songs again
-		if (cmd == "refreshall")
+		else if (cmd == "refreshall")
 		{
 			import xp.platforms;
 
@@ -83,6 +78,11 @@ int main(string[] args)
 				addSong(newSi);
 			}
 			return 0;
+		}
+		else if(cmd == "path")
+		{
+			import standardpaths;
+			writeln(writablePath(StandardPath.data, FolderFlag.create) ~ "/xp");
 		}
 	}
 	else
